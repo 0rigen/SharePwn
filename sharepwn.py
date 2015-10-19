@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sys
+from sys import stdout
 import brute_browse
 
 __author__ = '0rigen'
@@ -17,26 +18,21 @@ def banner():
 
     SharePoint Security Auditing by @_0rigen / 0rigen.net""")
 
-# TODO:
-# Create argument parsing to call features on-demand rather than monolithic and such
-#
-#  Output structure: ! - info, X - error, * - finding/positive
-#########################################
-# Command Line Arguments #
-# -u URL of target
-# -L file-based list of brute browsing targets
-# -O specify output file rather than stdout
-#########################################
-
 try:
     # Parse argument
     parser = argparse.ArgumentParser()
     parser.add_argument("-target", type=str, help="URL of the target SP site")
-    parser.add_argument("-browse", help="Perform Brute-Force Browsing")
-    parser.add_argument("-pick", help="Perform Enumeration via Picker Service")
-    parser.add_argument("-uid", help="Perform Brute-Force User ID Search")
+    parser.add_argument("-b", help="Perform Brute-Force Browsing", action='store_true')
+    parser.add_argument("-p", help="Perform Enumeration via Picker Service", action='store_true')
+    parser.add_argument("-u", help="Perform Brute-Force User ID Search", action='store_true')
+    parser.add_argument("-o", help="Specify output file", type=argparse.FileType('w'))
     args = parser.parse_args()
     target = args.target
+
+    # Handle stdout redirection for output file
+    if args.o is not None:
+        print args.o
+        sys.stdout = open(args.o.name, 'w')
 
     # Error if no target specified
     if target is None:
@@ -50,12 +46,16 @@ try:
         # Set Logging level (based on command line arg in the future
         logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
 
-        ans = raw_input("Perform brute force browsing? (y/n): ")
-        if ans == 'y':
+        if args.b is True:
+            print ("\nBeginning brute force browsing...")
             finds = brute_browse.geturlcode(target, None, "service_list.txt")
             print ("\n")
             print ("I found"),
             print finds
+        if args.p is True:
+            print ("\nEnumerating users via Picker service...")
+        if args.u is True:
+            print ("\nBrute-Forcing User IDs...")
 
 except KeyboardInterrupt:
     print("\n\nYour keys interrupted meh! Quitting...")
