@@ -19,7 +19,8 @@ def banner():
 
 # TODO:
 # Create argument parsing to call features on-demand rather than monolithic and such
-
+#
+#  Output structure: ! - info, X - error, * - finding/positive
 #########################################
 # Command Line Arguments #
 # -u URL of target
