@@ -9,7 +9,7 @@
 /_vti_bin/FormsServices.asmx
 /_vti_bin/Copy.asmx
 /_vti_bin/Dws.asmx
-/_vti_bin/Gorms.asmx
+/_vti_bin/Forms.asmx
 /_vti_bin/Imaging.asmx
 /_vti_bin/DspSts.asmx
 /_vti_bin/Picker.asmx
