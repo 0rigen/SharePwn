@@ -4,6 +4,8 @@ import url_processor
 import logging
 
 __author__ = '0rigen'
+__email__ = "0rigen@0rigen.net"
+__status__ = "Prototype"
 
 
 # TODO:
@@ -58,7 +60,7 @@ def enumusers(target, start=None, end=None):
             else:
                 pass
         except:                                                             # Handle things that go badly...
-            print("[X] Unexpected Error in enumusers()")
+            print("[X] Unexpected Error in enumusers(), failures loop")
 
     logging.info("UserID Brute Force Completed.")
 

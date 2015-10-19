@@ -26,30 +26,36 @@ def banner():
 # -u URL of target
 # -L file-based list of brute browsing targets
 # -O specify output file rather than stdout
-# ..
-# ..
 #########################################
 
 try:
+    # Parse argument
     parser = argparse.ArgumentParser()
     parser.add_argument("-target", type=str, help="URL of the target SP site")
+    parser.add_argument("-browse", help="Perform Brute-Force Browsing")
+    parser.add_argument("-pick", help="Perform Enumeration via Picker Service")
+    parser.add_argument("-uid", help="Perform Brute-Force User ID Search")
     args = parser.parse_args()
     target = args.target
+
+    # Error if no target specified
     if target is None:
         print("No target specified.  Use -t to specify the target URL")
         sys.exit(1)
-    else:
 
+    else:
         # Welcome to SharePwn
         banner()
 
         # Set Logging level (based on command line arg in the future
         logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
 
-        # Just do everything, until I can get args to work... :(
-        finds = brute_browse.geturlcode(target, None, "service_list.txt")
-        print ("\n")
-        print finds
+        ans = raw_input("Perform brute force browsing? (y/n): ")
+        if ans == 'y':
+            finds = brute_browse.geturlcode(target, None, "service_list.txt")
+            print ("\n")
+            print ("I found"),
+            print finds
 
 except KeyboardInterrupt:
     print("\n\nYour keys interrupted meh! Quitting...")

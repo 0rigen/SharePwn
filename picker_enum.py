@@ -2,6 +2,8 @@ import requests
 import url_processor
 
 __author__ = '0rigen'
+__email__ = "0rigen@0rigen.net"
+__status__ = "Prototype"
 
 
 ###############################################
