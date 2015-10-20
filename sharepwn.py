@@ -1,7 +1,7 @@
 import argparse
 import logging
 import sys
-from sys import stdout
+import user_id
 import brute_browse
 
 __author__ = '0rigen'
@@ -25,14 +25,13 @@ try:
     parser.add_argument("-b", help="Perform Brute-Force Browsing", action='store_true')
     parser.add_argument("-p", help="Perform Enumeration via Picker Service", action='store_true')
     parser.add_argument("-u", help="Perform Brute-Force User ID Search", action='store_true')
-    parser.add_argument("-o", help="Specify output file", type=argparse.FileType('w'))
+    #parser.add_argument("-o", help="Specify output file", type=argparse.FileType('w'))
     args = parser.parse_args()
     target = args.target
 
     # Handle stdout redirection for output file
-    if args.o is not None:
-        print args.o
-        sys.stdout = open(args.o.name, 'w')
+    #if args.o is not None:
+    #    sys.stdout = open(args.o.name, 'w')
 
     # Error if no target specified
     if target is None:
@@ -47,7 +46,7 @@ try:
         logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
 
         if args.b is True:
-            print ("\nBeginning brute force browsing...")
+            print ("\nBeginning brute force browsing...\n")
             finds = brute_browse.geturlcode(target, None, "service_list.txt")
             print ("\n")
             print ("I found"),
@@ -55,7 +54,26 @@ try:
         if args.p is True:
             print ("\nEnumerating users via Picker service...")
         if args.u is True:
-            print ("\nBrute-Forcing User IDs...")
+            b = True
+            while b is True:
+
+                mini = raw_input("[?] Starting UserID: ")
+                maxi = raw_input("[?] Ending UserID: ")
+
+                try:                                                # Make sure they'r integers
+                    mini = int(mini)
+                    maxi = int(maxi)
+
+                    if (mini - maxi) > 0:                           # Make sure they are ordered properly
+                        print("\n[X] Starting UserID must be less than Ending UserID...duh")
+                    else:
+                        b = False                                   # All test pass
+
+                except:
+                    print("\n[X] Must input actual numbers...genius...try again!")
+
+            print ("\nBrute-Forcing User IDs...\n")                 # Start working...
+            user_id.enumusers(target, mini, maxi)
 
 except KeyboardInterrupt:
     print("\n\nYour keys interrupted meh! Quitting...")

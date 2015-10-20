@@ -21,6 +21,7 @@ def geturlcode(target, link=None, urllist=None):
 
     # If a single URL is given
     if link is not None:
+        sys.stdout.flush()
         sys.stdout.write("\r[...] Requesting: %s%s" % (target, link))     # Write current request to stdout
         l = url_processor.checkhttp(target)                             # Check/add HTTP protocol to target domain
         page = l + link                                                 # Append page to target domain
@@ -30,7 +31,6 @@ def geturlcode(target, link=None, urllist=None):
         try:
             r = requests.get(page)                                      # Try to get the page
         except:
-            sys.stdout.flush()
             pass                                                        # Ignore HTTP errors and keep going
 
         if r is not None:
