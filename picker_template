@@ -1,5 +1,0 @@
-POST /_layouts/Picker.aspx HTTP/1.0
-Accept: text/xml
-Host: {{Target}}
-User-Agent: Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)
-Content-Type: text/xml; charset=utf-8

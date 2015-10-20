@@ -23,6 +23,6 @@ def checkhttp(url):
         return theurl
     elif res is not None:
         theurl = url
-        logging.INFO("The URL is already good")
+        logging.info("The URL is already good")
         return theurl
 
