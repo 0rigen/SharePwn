@@ -17,12 +17,12 @@ SOAPAction: "http://schemas.microsoft.com/sharepoint/soap/SearchPrincipals"
 """
 people_data = """
 <?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelop/">
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <SearchPrincipals xmlns="http://schemas.microsoft.com/sharepoint/soap/">
             <searchText>{{searchString}}</searchText>
             <maxResults>{{maxResults}}</maxResults>
-            <principalType>{{principalType}}</prinicpalType>
+            <principalType>{{principalType}}</principalType>
         </SearchPrincipals>
    </soap:Body>
 </soap:Envelope>
@@ -43,6 +43,7 @@ request_set = ['$', 'SYSTEM', 'AUTHORITY', 'admin', 'Administrator', 'administra
 ############################################################################################
 
 def people_enum(target, text, results, rtype):
+    gogogo = False
 
     # Chop off HTTP if it is present
     target = target.replace("http://", "")
@@ -82,7 +83,6 @@ def people_enum(target, text, results, rtype):
         if re.match("4..", r.status_code) is not None:
             print("\n[!] Received Status %s.  Cannot continue.\n" % str(r.status_code))
             logging.info("Got a 4XX error for People.aspx")
-            gogogo= False
 
         elif re.match("2..", r.status_code) is not None:
             print("\n[*] Received Status %s.  People search is available.\n" % str(r.status_code))
@@ -95,6 +95,9 @@ def people_enum(target, text, results, rtype):
         print("\n[!] Unknown error during People enumeration\n")
 
     if gogogo == True:
+
+        print("\n[*] Beginning alphabetic People search.\n")
+
         # Perform text enumeration via <searchText> parameter
         for c in ascii_lowercase:
 
@@ -123,6 +126,8 @@ def people_enum(target, text, results, rtype):
             except:
                 print("\n[!] Error returned for searchString %s\n" % c)
 
+        print("\n[*] Beginning special accounts search.\n")
+
         # Begin making requests for specialized accounts
         for s in request_set:
 
@@ -148,7 +153,7 @@ def people_enum(target, text, results, rtype):
                 print("\n[!] Error returned for searchString %s\n" % s)
 
     elif gogogo == False:
-        print("\n People service is locked down.\n")
+        print("\n[!] People service is locked down or non-existent.\n")
 
 # Unit Tests...
 people_enum("http://0rigen.net", "text", 20, "All")
