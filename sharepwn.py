@@ -79,7 +79,7 @@ def showmenu():
         print("\nPlease choose an option below\n")
         print("[B]rute Force Browsing")
         print("[S]ervice Access Testing")
-        print("[P]icker Service Enumeration")
+        print("[P]eople Service Enumeration")
         print("[U]serID Brute Force Search")
         print("[T]arget (Change your target URL)")
         print("[O]utput Redirection (print to files)")
