@@ -1,8 +1,9 @@
-import requests
-import url_processor
-import sys
 import logging
 import re
+import sys
+
+import requests
+import url_processor
 
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
@@ -53,7 +54,7 @@ def geturlcode(target, link=None, urllist=None):
             elif notfound is not None:
                 failures.append(page)
 
-            logging.info("* Requesting %s => [Returned " % l + str(r.status_code)+"]")
+            logging.info("[L] Requesting %s => [Returned " % l + str(r.status_code) + "]")
             sys.stdout.flush()
 
         else:

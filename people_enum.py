@@ -1,8 +1,9 @@
-import url_processor
-import sys
-import requests
 import logging
+import sys
 from string import ascii_lowercase
+
+import requests
+import url_processor
 
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
@@ -119,9 +120,8 @@ def people_enum(target, text, results, rtype):
                 # (?:</?AccountName>)
                 # <AccountName>.*</?AccountName>
 
-
             except requests.HTTPError:
-                logging.error("Got an HTTP error on an already validated People.aspx")
+                logging.error("[!] Got an HTTP error on an already validated People.aspx")
 
             except:
                 print("\n[!] Error returned for searchString %s\n" % c)
@@ -156,4 +156,4 @@ def people_enum(target, text, results, rtype):
         print("\n[!] People service is locked down or non-existent.\n")
 
 # Unit Tests...
-people_enum("http://0rigen.net", "text", 20, "All")
+        # people_enum("http://0rigen.net", "text", 20, "All")
