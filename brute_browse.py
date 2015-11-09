@@ -3,7 +3,6 @@ import re
 import sys
 
 import requests
-import url_processor
 
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
@@ -24,9 +23,8 @@ def geturlcode(target, link=None, urllist=None):
     if link is not None:
         sys.stdout.flush()
         sys.stdout.write("\r[...] Requesting: %s%s" % (target, link))     # Write current request to stdout
-        l = url_processor.checkhttp(target)                             # Check/add HTTP protocol to target domain
-        page = l + link                                                 # Append page to target domain
-        page.replace("\n", "")                                          # Remove stray newlines
+        page = target + link  # Append page to target domain
+        page.replace("\n", "")  # Remove stray newlines
 
         r = None
         try:

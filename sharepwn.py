@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import sys
 
 import brute_browse
@@ -16,7 +17,7 @@ __status__ = "Prototype"
 # Begin function definitions section
 # ************************************
 def banner():
-    print(chr(27) + "[2J")
+    os.system('cls' if os.name == 'nt' else 'clear')
     print("""
       ___   _                         ___
      / __| | |_    __ _   _ _   ___  | _ \ __ __ __  _ _
@@ -53,7 +54,7 @@ def changeport():
 ########################
 def bruteforcebrowsing():
     print ("\nBeginning brute force browsing...\n")
-    finds = brute_browse.geturlcode(target, None, "service_list.txt")
+    finds = brute_browse.geturlcode(target[0], None, "service_list.txt")
     print ("\n")
     # TODO: Clean up how 'finds' is printed to make it more easily readable
     print ("I found "),
@@ -92,7 +93,7 @@ def useridenumeration():
             print("\n[X] UserIDs must be numeric values only")
 
     print ("\nBrute-Forcing User IDs...\n")                 # Start working...
-    user_id.enumusers(target, mini, maxi)
+    user_id.enumusers(target[0], mini, maxi)
 
 
 def showmenu(tar):
@@ -202,5 +203,5 @@ except KeyboardInterrupt:
     print("\n\n[!] Caught keyboard interrupt.  Bye?")
     sys.exit(0)
 except:
-    print("[X] Unknown error")
+    print("\n[X] Unknown error")
     sys.exit(1)

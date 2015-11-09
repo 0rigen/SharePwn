@@ -23,14 +23,18 @@ def checkhttp(url, port):
             logging.info("Appended HTTP...")
             return theurl
         elif res is not None:
-            theurl = url[0]
-            logging.info("The URL is already good")
+            theurl = url
+            logging.info("The HTTP link is already good")
             return theurl
     if port == 443:
         res = re.search("https://", url, re.IGNORECASE)
         if res is None:
             theurl = "https://" + url
             logging.info("Appended HTTPS...")
+            return theurl
+        elif res is not None:
+            theurl = url
+            logging.info("The HTTPS link is already good")
             return theurl
     else:
         print ("[!] Non-standard ports not yet supported!")
