@@ -62,7 +62,7 @@ def geturlcode(target, link=None, urllist=None):
             sys.stdout.flush()
 
         else:
-            pass  # Just keep going if 4xx or 5xx error encountered
+            pass  # just keep going if 4xx or 5xx error encountered
 
         sys.stdout.flush()  # Remove current request line
 
