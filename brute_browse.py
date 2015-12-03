@@ -18,11 +18,17 @@ failures = []
 # @urllist - a file containing a list of urls #
 ###############################################
 def geturlcode(target, link=None, urllist=None):
-
+    ############################################################
+    # If 'link' is none, then we should have a list.           #
+    # A list is processed with recursive calls to geturlcode() #
+    # with a single link (line) argument read from the file.   #
+    # Link and file can be passed in simultaneously, and will  #
+    # handle the singe link followed by the list               #
+    ############################################################
     # If a single URL is given
     if link is not None:
         sys.stdout.flush()
-        sys.stdout.write("\r[...] Requesting: %s%s" % (target, link))     # Write current request to stdout
+        sys.stdout.write("\r[...] Requesting: %s%s" % (target, link))  # Write current request to stdout
         page = target + link  # Append page to target domain
         page.replace("\n", "")  # Remove stray newlines
 
@@ -43,8 +49,8 @@ def geturlcode(target, link=None, urllist=None):
             if success_code is not None:
                 successes.append(page)
                 print("\r[*] Found Open %s <Code %s>" % (page, str(r.status_code)))
-            elif forbid_code is not None:                                       # Add to the results list if
-                successes.append(page)                                              # any kind of success was returned
+            elif forbid_code is not None:  # Add to the results list if
+                successes.append(page)  # any kind of success was returned
                 print("\r[*] Found Restricted %s <Code %s>" % (page, str(r.status_code)))
             elif unauth_code is not None:
                 successes.append(page)
@@ -61,12 +67,14 @@ def geturlcode(target, link=None, urllist=None):
         sys.stdout.flush()  # Remove current request line
 
     # If a file list of URLs is given
-    elif urllist is not None:
+    if urllist is not None:
         with open(urllist, "r") as infile:                                      # open the file...
             logging.info("file %s" % infile + " opened.")
             for line in infile:
                 line = line.rstrip()                                            # Clean up the input line
                 geturlcode(target, line, None)                                  # Call self on that url individually
+
+    # If neither were passed in... this function was called incorrectly
     else:
         print("Something went wrong!  Quitting...")
         logging.error("geturlcode() did not receive any valid parameters")
