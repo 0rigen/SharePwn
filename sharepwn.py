@@ -6,6 +6,7 @@ import sys
 import brute_browse
 import url_processor
 import user_id
+import version_id
 
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
@@ -61,6 +62,10 @@ def bruteforcebrowsing():
     print finds
 
 
+def version():
+    version_id.identify(target[0], target[1])
+
+
 ######################
 # Picker Enumeration #
 ######################
@@ -111,6 +116,7 @@ def showmenu(tar):
         if choice.capitalize() =='B':
             bruteforcebrowsing()
         elif choice.capitalize() =='S':
+            version()
             print("\nNot yet implemented\n")
         elif choice.capitalize() =='P':
             pickerenumeration()
