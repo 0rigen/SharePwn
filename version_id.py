@@ -21,7 +21,7 @@ __status__ = "Prototype"
 
 ####################################################
 # identify                                         #
-# Records a response from the target and examines  #
+# Record a response from the target and examines   #
 # the headers for SP version information           #
 # @url - the target                                #
 # @ port - the target port                         #
@@ -67,6 +67,4 @@ def identify(url, port=None):
         ver = str(sp_match.group())  # Store the version info and return
         print("[*] SharePoint version identified as %s" % ver)
         logging.info("Version ID successful. Found %s" % ver)
-        # TODO print asp_match.group()
-        # TODO print serv_match.group()
         return ver
