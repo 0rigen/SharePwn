@@ -1,3 +1,4 @@
+import httplib
 import logging
 import sys
 from string import ascii_lowercase
@@ -18,8 +19,10 @@ endc = "\033[0m"
 bold = "\033[1m"
 underline = "\033[4m"
 
+# Although this header is declared, requests does not use it currently.  If I need this,
+# I'll have to manually tell it to use this header data.
 people_headers = """
-POST /_vti_bin/People.asmx HTTP/1.0
+POST /_vti_bin/People.asmx HTTP/{{http}}
 Host: {{Target}}
 Content-Type: text/xml; charset=utf-8
 Content-Length: {{length}}
@@ -41,8 +44,23 @@ people_data = """
 request_set = ['$', 'SYSTEM', 'AUTHORITY', 'admin', 'Administrator', 'administrator', 'Admin', '\\']
 
 
-# TODO Determine if People.asmx exists in root web directory or under a common subfolder like Search
-# TODO Determine if requests is using the correct HTTP version without my interaction; wireshark it?
+###########################################################
+# locate() - Find or specify the location of People.asmx  #
+# @target - the url.port couplet of the target            #
+# loc - returns the location where People.asmx was found  #
+###########################################################
+def locate(target):
+    # Potential locations
+    locations = ['/', '/Search']
+    serv = "_vti_bin/People.asmx"
+    for option in locations:
+        loc = target[0] + option + serv
+        loc = url_processor.checkhttp(loc, target[1])
+        r = requests.get(loc)
+        if str(r.status_code).startswith("200"):
+            print(yellow + "[!] Located People.asmx at: %s" % loc)
+            return loc
+
 
 ############################################################################################
 # Uses the people.asmx service to enumerate users, systems, and other accounts.  Begins by
@@ -54,7 +72,6 @@ request_set = ['$', 'SYSTEM', 'AUTHORITY', 'admin', 'Administrator', 'administra
 # @results - the number of results to request
 # @rtype - the type of data to request, usually All.
 ############################################################################################
-
 def people_enum(target, text, results, rtype):
     gogogo = False
 
@@ -70,8 +87,7 @@ def people_enum(target, text, results, rtype):
         print(red + "[X] Invalid parameter sent to People.asmx searcher" + endc)
         return 1
 
-    t = url_processor.checkhttp(url, port)
-    destination = t + "/Search/_vti_bin/People.asmx"
+    destination = locate(target)
 
     # Set XML Values for dummy request
     head = people_headers.replace("{{Target}}", url)
@@ -85,24 +101,27 @@ def people_enum(target, text, results, rtype):
     # Build dummy Packet and test responsiveness
     payload = data
 
-    #
-    # This does not yet send requests to non-standard ports... TODO Enumerate users on non-standard ports
-    #
+    # TODO non-standard ports
 
     sys.stdout.write(yellow + "\n[*] Sending test request to %s\n" % (destination) + endc)
     try:
 
+        # Manually force HTTP/1.1
+        httplib.HTTPConnection._http_vsn = 10
+        httplib.HTTPConnection._http_vsn_str = 'HTTP/1.1'
         # Send a dummy request to see if it gets processed
-        r = requests.post(destination, data=payload)
-        logging.info("Dummy request sent to People.aspx")
+        r11 = requests.post(destination, data=payload)
+        logging.info("Dummy request sent to People.aspx via HTTP/1.1")
 
-        if str(r.status_code).startswith("2"):
-            print(green + "\n[*] Received Status %s.  People search is available.\n" % str(r.status_code) + endc)
+        if str(r11.status_code).startswith("2"):
+            print(green + "\n[*] Received Status %s.  People search is available.\n" % str(r11.status_code) + endc)
             logging.info("Received a 2XX Status for People.aspx")
             gogogo = True
-
+        elif str(r11.status_code).startswith("40"):
+            print(
+                yellow + "\n[!] Received Status %s.  People search is properly locked down! :) \n" % r11.status_code + endc)
         else:
-            print(yellow + "\n[!] Received Unexpected Status %s" % str(r.status_code) + endc)
+            print(yellow + "\n[!] Received Unexpected Status %s" % str(r11.status_code) + endc)
 
     except requests.HTTPError:
         print(red + "\n[X] Error Received.  People.asmx Service is locked down or not there.\n" + endc)
@@ -111,19 +130,23 @@ def people_enum(target, text, results, rtype):
 
     if gogogo == True:
 
+        #
+        # If People.asmx is accessible, start to enumerate all users #
+        # first alphabetically, then by specialized names.           #
+        #
         print(green + "\n[*] Beginning alphabetic People search.\n")
 
         # Perform text enumeration via <searchText> parameter
         for c in ascii_lowercase:
 
             # Build the request body
-            data = people_data.replace("{{maxResults}}", str(numresults))       # Set max results value
-            data = data.replace("{{principalType}}", restype)                   # Set principalType value
-            data = data.replace("{{searchString}}", c)                          # Set searchString to single character
+            data = people_data.replace("{{maxResults}}", str(numresults))  # Set max results value
+            data = data.replace("{{principalType}}", restype)  # Set principalType value
+            data = data.replace("{{searchString}}", c)  # Set searchString to single character
             payload = data
 
             try:
-                r = requests.post(destination, data=payload)                # Send a request with new searchString
+                r11 = requests.post(destination, data=payload)  # Send a request with new searchString
                 logging.info("Request sent to People.aspx with searchString %s" % c)
 
                 # TODO: Regex to filter through returned results and print them here
@@ -135,24 +158,27 @@ def people_enum(target, text, results, rtype):
                 # <AccountName>.*</?AccountName>
 
             except requests.HTTPError:
-                logging.error(red + "[!] Got an HTTP error on an already validated People.aspx" + endc)
+                logging.error(red + "[!] Got an HTTP error on an already validated People.aspx..That's bad!" + endc)
 
             except:
                 print(red + "\n[!] Error returned for searchString %s\n" % c + endc)
 
+        #
+        # Special accounts search
+        #
         print("\n[*] Beginning special accounts search.\n")
 
         # Begin making requests for specialized accounts
         for s in request_set:
 
             # Build the request body
-            data = people_data.replace("{{maxResults}}", str(numresults))       # Set max results value
-            data = data.replace("{{principalType}}", restype)                   # Set principalType value
-            data = data.replace("{{searchString}}", c)                      # Set searchString to single character
+            data = people_data.replace("{{maxResults}}", str(numresults))  # Set max results value
+            data = data.replace("{{principalType}}", restype)  # Set principalType value
+            data = data.replace("{{searchString}}", c)  # Set searchString to single character
             payload = data
 
             try:
-                r = requests.post(destination, data=payload)                # Send a request with new searchString
+                r11 = requests.post(destination, data=payload)  # Send a request with new searchString
                 logging.info("Request sent to People.aspx with searchString %s" % s)
 
                 # TODO: Regex to filter through returned results and print them here
@@ -167,4 +193,4 @@ def people_enum(target, text, results, rtype):
                 print(red + "\n[!] Error returned for searchString %s\n" % s + endc)
 
     elif gogogo == False:
-        print(red + "\n[!] People service is locked down or non-existent.\n" + endc)
+        print(red + "[!] People Service Query Complete.  The service is locked down or non-existent.\n" + endc)
