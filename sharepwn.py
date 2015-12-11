@@ -1,4 +1,3 @@
-import argparse
 import logging
 import os
 import sys
@@ -15,7 +14,7 @@ __status__ = "Prototype"
 red = "\033[31m"  # usually for errors, [X] items
 cyan = "\033[36m"
 yellow = "\033[33m"  # usually for information and requests, the [?] items
-green = "\033[32m"  # Information and success, [!]
+green = "\033[92m"  # Information and success, [!]
 blue = "\033[94m"
 endc = "\033[0m"
 bold = "\033[1m"
@@ -83,9 +82,10 @@ def version():
 ######################
 # Picker Enumeration #
 ######################
-def pickerenumeration():
-    print ("Picker Not Yet Implemented.")
-    # TODO: Picker service enumeration
+def peopleenumeration():
+    print ("People.asmx Search Not Yet Implemented.")
+    # TODO: People service enumeration
+    people_en
 
 
 #######################
@@ -118,8 +118,8 @@ def useridenumeration():
 
 def showmenu(tar):
     while True:
-        print(endc + blue + bold + "\n[*] Targeting: %s:%s [*]" % (tar[0], tar[1]) + endc)
-        print("\033[92m" + "Please choose an option below: \n")
+        print(endc + blue + "\n[*] Targeting: %s:%s [*]" % (tar[0], tar[1]) + endc)
+        print(cyan + "Please choose an option below: \n")
         print("[V]ersion Identification")
         print("[B]rute Force Browsing")
         print("[S]ervice Access Testing")
@@ -136,7 +136,7 @@ def showmenu(tar):
         elif choice.capitalize() == 'S':
             print("\nNot yet implemented\n")
         elif choice.capitalize() == 'P':
-            pickerenumeration()
+            peopleenumeration()
         elif choice.capitalize() == 'U':
             useridenumeration()
         elif choice.capitalize() == 'T':
@@ -152,6 +152,11 @@ def showmenu(tar):
 # Begin instruction section
 # ************************************
 try:
+    # Runtime target holder
+    target = changetarget()
+
+    # This huge comment block contains command-line parsing code.  This will be implemented in a future version #
+    '''
     # Parse arguments
     # TODO: Investigate turning arguments into long words, but allowing abbreviation instead of requiring it
     parser = argparse.ArgumentParser()
@@ -164,9 +169,6 @@ try:
     # TODO: Handle file output throughout program (probably should be a final clean-up item)
     # parser.add_argument("-o", help="Specify output file", type=argparse.FileType('w'))
     args = parser.parse_args()
-
-    # Runtime target holder
-    target = []
 
     ######################################################################################
     # Handle target specification.  This can come in the following combinations:
@@ -189,12 +191,6 @@ try:
     else:
         target = changetarget()
 
-    # Welcome to SharePwn
-    banner()
-
-    # Set Logging level (based on command line arg in the future
-    logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
-
     #####################################################################
     # Handle command-line functionality specification.                  #
     # Rather than using the menu, a user can specify functions to use   #
@@ -215,6 +211,15 @@ try:
     # TODO: Find a way to display these input options better, or allow users to do it form command line -u argument
     if args.u is True:
         useridenumeration()
+
+    '''
+
+    # Welcome to SharePwn
+    banner()
+
+    # Set Logging level (based on command line arg in the future
+    logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
+
 
     # Either no command-line functions were specified or their runs have completed.  Go back to the menu...
     showmenu(target)

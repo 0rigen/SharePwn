@@ -15,14 +15,14 @@ __status__ = "Prototype"
 # and identify if valid data was returned or not.  It may just return a 'successful' but blank
 # page if permissions are properly set.
 
-red = "\033[00;31m"  # usually for errors, [X] items
-cyan = "\033[00;36m"
-yellow = "\033[00;33m"  # usually for information and requests, the [?] items
-green = "\033[00;32m"  # Information and success, [!]
-blue = "\033[00;34m"
-endc = '\033[0m'
-bold = '\033[1m'
-underline = '\033[4m'
+red = "\033[31m"  # usually for errors, [X] items
+cyan = "\033[36m"
+yellow = "\033[33m"  # usually for information and requests, the [?] items
+green = "\033[92m"  # Information and success, [!]
+blue = "\033[94m"
+endc = "\033[0m"
+bold = "\033[1m"
+underline = "\033[4m"
 
 ####################################
 #      enumusers()                 #

@@ -8,14 +8,14 @@ __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
 __status__ = "Prototype"
 
-red = "\033[00;31m"  # usually for errors, [X] items
-cyan = "\033[00;36m"
-yellow = "\033[00;33m"  # usually for information and requests, the [?] items
-green = "\033[00;32m"  # Information and success, [!]
-blue = "\033[00;34m"
-endc = '\033[0m'
-bold = '\033[1m'
-underline = '\033[4m'
+red = "\033[31m"  # usually for errors, [X] items
+cyan = "\033[36m"
+yellow = "\033[33m"  # usually for information and requests, the [?] items
+green = "\033[92m"  # Information and success, [!]
+blue = "\033[94m"
+endc = "\033[0m"
+bold = "\033[1m"
+underline = "\033[4m"
 
 
 # SP Versions are identified in the response headers as 'MicrosoftSharePointTeamServices': 'X.X.X.X'
@@ -77,10 +77,10 @@ def identify(url, port=None):
     else:
         ver = str(sp_match.group())  # Store the version info and return
 
-        print(green + "\n[*] SharePoint version identified as %s" % ver + endc)
+        print(green + "\n[*] SharePoint version identified as " + bold + "%s" % ver + endc)
         logging.info("Version ID successful. Found %s" % ver)
         if ver.startswith("6"):
-            print(green + "SharePoint 2003" + endc)
+            print(green + bold + "SharePoint 2003" + endc)
         if ver.startswith("14"):
             print(green + "SharePoint 2010" + endc)
         return ver
