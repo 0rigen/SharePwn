@@ -9,6 +9,15 @@ __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
 __status__ = "Prototype"
 
+red = "\033[00;31m"  # usually for errors, [X] items
+cyan = "\033[00;36m"
+yellow = "\033[00;33m"  # usually for information and requests, the [?] items
+green = "\033[00;32m"  # Information and success, [!]
+blue = "\033[00;34m"
+endc = '\033[0m'
+bold = '\033[1m'
+underline = '\033[4m'
+
 people_headers = """
 POST /_vti_bin/People.asmx HTTP/1.0
 Host: {{Target}}
@@ -56,7 +65,7 @@ def people_enum(target, text, results, rtype):
         restext = str(text)
         restype = str(rtype)
     except:
-        print("Invalid parameter sent to People.asmx searcher")
+        print(red + "[X] Invalid parameter sent to People.asmx searcher" + endc)
         return 1
 
     t = url_processor.checkhttp(target)
@@ -73,7 +82,7 @@ def people_enum(target, text, results, rtype):
 
     # Build dummy Packet and test responsiveness
     payload = data
-    sys.stdout.write("\n[*] Sending test request to %s\n" % destination)
+    sys.stdout.write(yellow + "\n[*] Sending test request to %s\n" % destination + endc)
     try:
 
         # Send a dummy request to see if it gets processed
@@ -82,22 +91,22 @@ def people_enum(target, text, results, rtype):
 
         # Check status_code for error or success
         if re.match("4..", r.status_code) is not None:
-            print("\n[!] Received Status %s.  Cannot continue.\n" % str(r.status_code))
+            print(red + "\n[!] Received Status %s from People.aspx.  Cannot continue.\n" % str(r.status_code) + endc)
             logging.info("Got a 4XX error for People.aspx")
 
         elif re.match("2..", r.status_code) is not None:
-            print("\n[*] Received Status %s.  People search is available.\n" % str(r.status_code))
+            print(green + "\n[*] Received Status %s.  People search is available.\n" % str(r.status_code) + endc)
             logging.info("Received a 2XX Status for People.aspx")
             gogogo = True
 
     except requests.HTTPError:
-        print("\n[!] Error Received.  People.asmx Service is locked down or not there.\n")
+        print(red + "\n[X] Error Received.  People.asmx Service is locked down or not there.\n" + endc)
     except:
-        print("\n[!] Unknown error during People enumeration\n")
+        print(red + "\n[!] Unknown error during People enumeration\n" + endc)
 
     if gogogo == True:
 
-        print("\n[*] Beginning alphabetic People search.\n")
+        print(green + "\n[*] Beginning alphabetic People search.\n")
 
         # Perform text enumeration via <searchText> parameter
         for c in ascii_lowercase:
@@ -113,7 +122,7 @@ def people_enum(target, text, results, rtype):
                 logging.info("Request sent to People.aspx with searchString %s" % c)
 
                 # TODO: Regex to filter through returned results and print them here
-                print("\n[*] This is where the results go for %s\n" % c)
+                print(green + "\n[*] This is where the results go for %s\n" % c + endc)
                 #
                 #
                 # regex to match <AccountName> and </AccountName>
@@ -121,10 +130,10 @@ def people_enum(target, text, results, rtype):
                 # <AccountName>.*</?AccountName>
 
             except requests.HTTPError:
-                logging.error("[!] Got an HTTP error on an already validated People.aspx")
+                logging.error(red + "[!] Got an HTTP error on an already validated People.aspx" + endc)
 
             except:
-                print("\n[!] Error returned for searchString %s\n" % c)
+                print(red + "\n[!] Error returned for searchString %s\n" % c + endc)
 
         print("\n[*] Beginning special accounts search.\n")
 
@@ -142,7 +151,7 @@ def people_enum(target, text, results, rtype):
                 logging.info("Request sent to People.aspx with searchString %s" % s)
 
                 # TODO: Regex to filter through returned results and print them here
-                print("[*] This is where the results go for %s" % s)
+                print(green + "[*] This is where the results go for %s" % s + endc)
                 #
                 #
 
@@ -150,10 +159,7 @@ def people_enum(target, text, results, rtype):
                 logging.error("Got an HTTP error on an already validated People.aspx")
 
             except:
-                print("\n[!] Error returned for searchString %s\n" % s)
+                print(red + "\n[!] Error returned for searchString %s\n" % s + endc)
 
     elif gogogo == False:
-        print("\n[!] People service is locked down or non-existent.\n")
-
-# Unit Tests...
-        # people_enum("http://0rigen.net", "text", 20, "All")
+        print(red + "\n[!] People service is locked down or non-existent.\n" + endc)

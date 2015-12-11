@@ -1,8 +1,9 @@
+import logging
 import re
+import sys
+
 import requests
 import url_processor
-import logging
-import sys
 
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
@@ -13,6 +14,15 @@ __status__ = "Prototype"
 # This checks for successful web requests, but will likely need to actually read the page
 # and identify if valid data was returned or not.  It may just return a 'successful' but blank
 # page if permissions are properly set.
+
+red = "\033[00;31m"  # usually for errors, [X] items
+cyan = "\033[00;36m"
+yellow = "\033[00;33m"  # usually for information and requests, the [?] items
+green = "\033[00;32m"  # Information and success, [!]
+blue = "\033[00;34m"
+endc = '\033[0m'
+bold = '\033[1m'
+underline = '\033[4m'
 
 ####################################
 #      enumusers()                 #
@@ -25,21 +35,21 @@ def enumusers(target, start=None, end=None):
 
     if start is None:                                                       # Assign default Start and End values
         start = 1
-        sys.stdout.write("[!] No start value provided, starting at UID=%d" % start)
+        sys.stdout.write(yellow + "[!] No start value provided, starting at UID=%d" % start + endc)
         sys.stdout.write("\n")
     if end is None:
         end = 10
-        sys.stdout.write("[!] No stop value provided, stopping at UID=%d" % end)
+        sys.stdout.write(yellow + "[!] No stop value provided, stopping at UID=%d" % end + endc)
         sys.stdout.write("\n")
 
     # Ensure proper target specification
-    target = url_processor.checkhttp(target)                                # Check traget formatting
+    target = url_processor.checkhttp(target[0], target[1])  # Check traget formatting
 
     # Begin requesting pages
     for i in range(start, end):                                            # From start to end...
 
         r = target + "/UserDisp.aspx?ID=" + str(i)                          # Compiled request string
-        sys.stdout.write("\r[...] Trying UserID = %d" % i)
+        sys.stdout.write(yellow + "\r[...] Trying UserID = %d" % i + endc)
 
         try:
             page = requests.get(r)                                          # Open the page
@@ -51,15 +61,15 @@ def enumusers(target, start=None, end=None):
                 failures.append(i)                                          # Add to Failures to retry with Force
                 sys.stdout.flush()
         except:                                                             # Handle things that go badly...
-            sys.stdout.write("\n[X] Unexpected Error in enumusers()\n")
+            sys.stdout.write(red + "\n[X] Unexpected Error in enumusers()\n" + endc)
 
-    sys.stdout.write("\n[!] Attempting failed IDs with the Force parameter set to True...")
+    sys.stdout.write(yellow + "\n[!] Re-attempting failed IDs with the Force parameter set to True..." + endc)
     sys.stdout.write("\n")
 
     for user in failures:
 
         r = target + "/UserDisp.aspx?ID=" + str(user) + "?Force=True"        # Request string with True parameter
-        sys.stdout.write("\r[...] Retrying UserID = %d" % user)
+        sys.stdout.write(yellow + "\r[...] Retrying UserID = %d" % user + endc)
 
         try:
             page = requests.get(r)                                          # Open the page
@@ -70,7 +80,7 @@ def enumusers(target, start=None, end=None):
             else:
                 pass
         except:                                                             # Handle things that go badly...
-            sys.stdout.write("\n[X] Unexpected Error in enumusers(), failures loop")
+            sys.stdout.write(red + "\n[X] Unexpected Error in enumusers(), failures loop" + endc)
 
         sys.stdout.flush()
 
@@ -78,8 +88,8 @@ def enumusers(target, start=None, end=None):
     sys.stdout.write("\n")
 
     if len(results) == 0:
-        print("[*] No users found")
+        print(yellow + "[*] No users found" + endc)
     else:
-        sys.stdout.write("[*] Found a user")
+        sys.stdout.write(green + "[*] Found a user" + endc)
 
     return results                                                          # Return array of successful IDs

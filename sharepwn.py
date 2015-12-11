@@ -12,20 +12,31 @@ __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
 __status__ = "Prototype"
 
+red = "\033[31m"  # usually for errors, [X] items
+cyan = "\033[36m"
+yellow = "\033[33m"  # usually for information and requests, the [?] items
+green = "\033[32m"  # Information and success, [!]
+blue = "\033[94m"
+endc = "\033[0m"
+bold = "\033[1m"
+underline = "\033[4m"
+
+
 # TODO: Move functionality calls outside of if statements and into their own functions
+
 
 # ************************************
 # Begin function definitions section
 # ************************************
 def banner():
     os.system('cls' if os.name == 'nt' else 'clear')
-    print("""
+    print("\033[95m" + bold + """
       ___   _                         ___
      / __| | |_    __ _   _ _   ___  | _ \ __ __ __  _ _
      \__ \ | ' \  / _` | | '_| / -_) |  _/ \ V  V / | ' \\
      |___/ |_||_| \__,_| |_|   \___| |_|    \_/\_/  |_||_|  V.01
 
-    SharePoint Security Auditing by @_0rigen / 0rigen.net""")
+    SharePoint Security Auditing by @_0rigen / 0rigen.net""" + endc)
 
 
 ################################
@@ -36,7 +47,7 @@ def banner():
 ################################
 def changetarget():
     tarout = []
-    t = raw_input("[?] Please enter a target URL now: ")
+    t = raw_input(cyan + "[?] Please enter a target URL now: " + endc)
     tarout.append(t)
     tarout.append(changeport())  # Call changeport() to get a new port #
     tarout[0] = url_processor.checkhttp(tarout[0], tarout[1])  # Process the target string
@@ -46,20 +57,23 @@ def changetarget():
 # Just a little port changing stub to return
 # a numeric port value
 def changeport():
-    port = raw_input("[?] Enter target port (usually 80 or 443): ")
-    port = int(port)
+    while True:
+        try:
+            port = raw_input(cyan + "[?] Enter target port (usually 80 or 443): " + endc)
+            port = int(port)
+            break
+        except:
+            print(yellow + "[!] Bad Port.  Try again." + endc)
     return port
+
 
 ########################
 # Brute Force Browsing #
 ########################
 def bruteforcebrowsing():
-    print ("\nBeginning brute force browsing...\n")
-    finds = brute_browse.geturlcode(target[0], None, "service_list.txt")
+    print (yellow + "\n[!] Beginning brute force browsing...\n" + endc)
+    finds = brute_browse.geturl_list(target[0], "service_list.txt")
     print ("\n")
-    # TODO: Clean up how 'finds' is printed to make it more easily readable
-    print ("I found "),
-    print finds
 
 
 def version():
@@ -70,7 +84,8 @@ def version():
 # Picker Enumeration #
 ######################
 def pickerenumeration():
-    print ("picker stuff")
+    print ("Picker Not Yet Implemented.")
+    # TODO: Picker service enumeration
 
 
 #######################
@@ -82,29 +97,30 @@ def useridenumeration():
     while b is True:
         try:
 
-            mini = raw_input("\r[?] Starting UserID: ")     # Make sure they're integers
+            mini = raw_input(yellow + "\r[?] Starting UserID: " + endc)  # Make sure they're integers
             mini = int(mini)
-            maxi = raw_input("[?] Ending UserID: ")
+            maxi = raw_input(yellow + "[?] Ending UserID: " + endc)
             maxi = int(maxi)
 
-            if (mini - maxi) > 0:                           # Make sure they are ordered properly
+            if (mini - maxi) > 0:  # Make sure they are ordered properly
                 sys.stdout.flush()
-                print("\n[X] Starting UserID must be less than Ending UserID")
+                print(red + "\n[X] Starting UserID must be less than Ending UserID" + endc)
             else:
-                b = False                                   # All tests pass
+                b = False  # All tests pass
 
         except:
             sys.stdout.flush()
-            print("\n[X] UserIDs must be numeric values only")
+            print(red + "[X] UserIDs must be numeric values only" + endc)
 
-    print ("\nBrute-Forcing User IDs...\n")                 # Start working...
-    user_id.enumusers(target[0], mini, maxi)
+    print (green + "\n[!] Brute-Forcing User IDs...\n" + endc)  # Start working...
+    user_id.enumusers(target, mini, maxi)
 
 
 def showmenu(tar):
     while True:
-        print("\n[*] Targeting: %s:%s [*]" % (tar[0], tar[1]))
-        print("Please choose an option below: \n")
+        print(endc + blue + bold + "\n[*] Targeting: %s:%s [*]" % (tar[0], tar[1]) + endc)
+        print("\033[92m" + "Please choose an option below: \n")
+        print("[V]ersion Identification")
         print("[B]rute Force Browsing")
         print("[S]ervice Access Testing")
         print("[P]eople Service Enumeration")
@@ -112,21 +128,22 @@ def showmenu(tar):
         print("[T]arget (Change your target URL/Protocol)")
         print("[O]utput Redirection (Print to a file)")
         print("[Q]uit and go home")
-        choice = raw_input("Command: ")
-        if choice.capitalize() =='B':
-            bruteforcebrowsing()
-        elif choice.capitalize() =='S':
+        choice = raw_input("Command: " + endc)
+        if choice.capitalize() == 'V':
             version()
+        if choice.capitalize() == 'B':
+            bruteforcebrowsing()
+        elif choice.capitalize() == 'S':
             print("\nNot yet implemented\n")
-        elif choice.capitalize() =='P':
+        elif choice.capitalize() == 'P':
             pickerenumeration()
-        elif choice.capitalize() =='U':
+        elif choice.capitalize() == 'U':
             useridenumeration()
-        elif choice.capitalize() =='T':
+        elif choice.capitalize() == 'T':
             tar = changetarget()
-        elif choice.capitalize() =='O':
+        elif choice.capitalize() == 'O':
             print("\nNot yet implemented\n")
-        elif choice.capitalize() =='Q':
+        elif choice.capitalize() == 'Q':
             print("Quitting!")
             sys.exit(0)
 
@@ -206,8 +223,8 @@ try:
 # Handle Exceptions #
 #####################
 except KeyboardInterrupt:
-    print("\n\n[!] Caught keyboard interrupt.  Bye?")
+    print(red + "\n\n[!] Caught keyboard interrupt.  Bye?" + endc)
     sys.exit(0)
 except:
-    print("\n[X] Unknown error")
+    print(red + bold + "\n[X] Unknown error" + endc)
     sys.exit(1)

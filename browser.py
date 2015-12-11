@@ -1,6 +1,5 @@
 __author__ = 'Origen'
 
-import urllib2
 import requests
 
 ###############################################
