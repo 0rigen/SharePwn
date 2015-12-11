@@ -41,6 +41,9 @@ people_data = """
 request_set = ['$', 'SYSTEM', 'AUTHORITY', 'admin', 'Administrator', 'administrator', 'Admin', '\\']
 
 
+# TODO Determine if People.asmx exists in root web directory or under a common subfolder like Search
+# TODO Determine if requests is using the correct HTTP version without my interaction; wireshark it?
+
 ############################################################################################
 # Uses the people.asmx service to enumerate users, systems, and other accounts.  Begins by
 # performing a response test to see if  the service is properly locked down; abandons
@@ -55,9 +58,8 @@ request_set = ['$', 'SYSTEM', 'AUTHORITY', 'admin', 'Administrator', 'administra
 def people_enum(target, text, results, rtype):
     gogogo = False
 
-    # Chop off HTTP if it is present
-    target = target.replace("http://", "")
-    target = target.replace("HTTP://", "")
+    url = target[0]
+    port = target[1]
 
     # Verify input types
     try:
@@ -68,36 +70,39 @@ def people_enum(target, text, results, rtype):
         print(red + "[X] Invalid parameter sent to People.asmx searcher" + endc)
         return 1
 
-    t = url_processor.checkhttp(target)
-    destination = t + "/_vti_bin/People.asmx"
+    t = url_processor.checkhttp(url, port)
+    destination = t + "/Search/_vti_bin/People.asmx"
 
     # Set XML Values for dummy request
-    head = people_headers.replace("{{Target}}", target)
+    head = people_headers.replace("{{Target}}", url)
     data = people_data.replace("{{searchString}}", restext)
     data = data.replace("{{maxResults}}", str(numresults))
     data = data.replace("{{principalType}}", restype)
 
     logging.info("\nBuilding People.asmx dummy POST Request with the following parameters: \n")
-    logging.info("%s, %s, %s, %s" % (target, restext, str(numresults), restype))
+    logging.info("%s, %s, %s, %s" % (url, restext, str(numresults), restype))
 
     # Build dummy Packet and test responsiveness
     payload = data
-    sys.stdout.write(yellow + "\n[*] Sending test request to %s\n" % destination + endc)
+
+    #
+    # This does not yet send requests to non-standard ports... TODO Enumerate users on non-standard ports
+    #
+
+    sys.stdout.write(yellow + "\n[*] Sending test request to %s\n" % (destination) + endc)
     try:
 
         # Send a dummy request to see if it gets processed
         r = requests.post(destination, data=payload)
         logging.info("Dummy request sent to People.aspx")
 
-        # Check status_code for error or success
-        if re.match("4..", r.status_code) is not None:
-            print(red + "\n[!] Received Status %s from People.aspx.  Cannot continue.\n" % str(r.status_code) + endc)
-            logging.info("Got a 4XX error for People.aspx")
-
-        elif re.match("2..", r.status_code) is not None:
+        if str(r.status_code).startswith("2"):
             print(green + "\n[*] Received Status %s.  People search is available.\n" % str(r.status_code) + endc)
             logging.info("Received a 2XX Status for People.aspx")
             gogogo = True
+
+        else:
+            print(yellow + "\n[!] Received Unexpected Status %s" % str(r.status_code) + endc)
 
     except requests.HTTPError:
         print(red + "\n[X] Error Received.  People.asmx Service is locked down or not there.\n" + endc)

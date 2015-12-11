@@ -3,6 +3,7 @@ import os
 import sys
 
 import brute_browse
+import people_enum
 import url_processor
 import user_id
 import version_id
@@ -83,9 +84,7 @@ def version():
 # Picker Enumeration #
 ######################
 def peopleenumeration():
-    print ("People.asmx Search Not Yet Implemented.")
-    # TODO: People service enumeration
-    people_en
+    people_enum.people_enum(target, "admin", 1000, "All")
 
 
 #######################
@@ -120,14 +119,14 @@ def showmenu(tar):
     while True:
         print(endc + blue + "\n[*] Targeting: %s:%s [*]" % (tar[0], tar[1]) + endc)
         print(cyan + "Please choose an option below: \n")
-        print("[V]ersion Identification")
-        print("[B]rute Force Browsing")
-        print("[S]ervice Access Testing")
-        print("[P]eople Service Enumeration")
-        print("[U]serID Brute Force Search")
-        print("[T]arget (Change your target URL/Protocol)")
-        print("[O]utput Redirection (Print to a file)")
-        print("[Q]uit and go home")
+        print("[" + yellow + "V" + endc + cyan + "]ersion Identification")
+        print("[" + yellow + "B" + endc + cyan + "]rute Force Browsing")
+        print("[" + yellow + "S" + endc + cyan + "]ervice Access Testing")
+        print("[" + yellow + "P" + endc + cyan + "]eople Service Enumeration")
+        print("[" + yellow + "U" + endc + cyan + "]serID Brute Force Search")
+        print("[" + yellow + "T" + endc + cyan + "]arget (Change your target URL/Protocol)")
+        print("[" + yellow + "O" + endc + cyan + "]utput Redirection (Print to a file)")
+        print("[" + yellow + "Q" + endc + cyan + "]uit and go home")
         choice = raw_input("Command: " + endc)
         if choice.capitalize() == 'V':
             version()
