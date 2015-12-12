@@ -37,14 +37,6 @@ underline = "\033[4m"
 # @ port - the target port                         #
 ####################################################
 def identify(url, port=None):
-    # TODO: Use the servreg and aspreg to also identify server software and asp version information, if present
-
-    # Regex to look for #.#.#.# format, where # is 1 or more numbers, dot separated
-    spreg = re.compile("[\']([6,12,14,15]+\.)+(\d+\.)+(\d+\.)+(\d*)[\']")
-    # Regex to identify Server in use
-    servreg = re.compile("[\']Server[\']: [\'](.+?)\'")
-    # Regex to identify ASP version, if any
-    aspreg = re.compile("[\']X-AspNet-Version[\']: [\'](\d+\.)?(\d+\.)?(\d+\.)?(\d*)[\']")
 
     # Process the link, if port is specified
     if port is not None:
@@ -66,29 +58,33 @@ def identify(url, port=None):
         return "Unknown"
 
     # Search for version info in headers
-    sp_match = re.search(spreg, str(r.headers))  # Otherwise, keep working
-    asp_match = re.search(aspreg, str(r.headers))
-    serv_match = re.search(servreg, str(r.headers))
+    sp_match = r.headers['microsoftsharepointteamservices']
+    asp_match = r.headers['x-aspnet-version']
+    serv_match = r.headers['server']
 
     # Process SharePoint version
     if sp_match is None:  # No version info returned
         print(yellow + "[!] No SharePoint version information returned." + endc)
         logging.info("Version ID failed; successful request but no version information found.")
     else:
-        ver = str(sp_match.group())  # Store the version info and return
-        print(green + "\n[*] SharePoint version identified as " + bold + "%s" % ver + endc)
+        ver = str(sp_match)  # Store the version info and return
+        print(green + "\n[*] SharePoint version identified as " + bold + "%s" % ver + endc),
         logging.info("SP Version ID successful. Found %s" % ver)
         if ver.startswith("6"):
             print(green + bold + "SharePoint 2003" + endc)
-        if ver.startswith("14"):
-            print(green + "SharePoint 2010" + endc)
+        elif ver.startswith("14"):
+            print(green + bold + "SharePoint 2010" + endc)
+        elif ver.startswith("12"):
+            print(green + bold + "SharePoint 2007" + endc)
+        elif ver.startswith("15"):
+            print(green + bold + "SharePoint 2013" + endc)
 
     # Process ASP version
     if asp_match is None:  # No version info returned
         print(yellow + "[!] ASP version not identified." + endc)
         logging.info("ASP version ID failed; successful request but no version information found.")
     else:
-        ver = str(asp_match.group())  # Store the version info and return
+        ver = str(asp_match)  # Store the version info and return
         print(green + "\n[*] ASP version identified as " + bold + "%s" % ver + endc)
         logging.info("ASP Version ID successful. Found %s" % ver)
 
@@ -97,7 +93,7 @@ def identify(url, port=None):
         print(yellow + "[!] No Server version information returned." + endc)
         logging.info("Server version ID failed; successful request but no version information found.")
     else:
-        ver = str(serv_match.group())  # Store the version info and return
+        ver = str(serv_match)  # Store the version info and return
         print(green + "\n[*] Server version identified as " + bold + "%s" % ver + endc)
         logging.info("Server version ID successful. Found %s" % ver)
 

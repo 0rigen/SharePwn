@@ -72,7 +72,7 @@ def changeport():
 ########################
 def bruteforcebrowsing():
     print (yellow + "\n[!] Beginning brute force browsing...\n" + endc)
-    finds = brute_browse.geturl_list(target[0], "service_list.txt")
+    finds = brute_browse.geturl_list(target[0], "browse_list.txt")  # Brute force and save results
     print ("\n")
 
 
@@ -112,7 +112,11 @@ def useridenumeration():
             print(red + "[X] UserIDs must be numeric values only" + endc)
 
     print (green + "\n[!] Brute-Forcing User IDs...\n" + endc)  # Start working...
-    user_id.enumusers(target, mini, maxi)
+    FoundUsers = user_id.enumusers(target, mini, maxi)
+    print (yellow + "[*] Users found:" + endc)
+    for user in FoundUsers:
+        print user,
+
 
 
 def showmenu(tar):
