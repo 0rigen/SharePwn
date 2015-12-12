@@ -58,7 +58,7 @@ def locate(target):
         loc = url_processor.checkhttp(loc, target[1])
         r = requests.get(loc)
         if str(r.status_code).startswith("200"):
-            print(yellow + "[!] Located People.asmx at: %s" % loc)
+            print(yellow + "[*] " + endc + "Located People.asmx at: %s" % loc)
             return loc
 
 
@@ -84,7 +84,7 @@ def find_service(target):
     # Build dummy Packet and test responsiveness
     payload = data
 
-    sys.stdout.write(yellow + "\n[*] Sending test request to %s\n" % destination + endc)
+    sys.stdout.write(yellow + "\n[*] " + endc + "Sending test request to %s\n" % destination + endc)
     try:
         # Manually force HTTP/1.1
         httplib.HTTPConnection._http_vsn = 10
@@ -94,22 +94,23 @@ def find_service(target):
         logging.info("Dummy request sent to People.aspx via HTTP/1.1")
 
         if str(r11.status_code).startswith("2"):
-            print(green + "\n[*] Received Status %s.  People search is available and not locked down!\n" % str(
+            print(
+            green + "\n[*] " + endc + "Received Status %s.  People search is available and not locked down!\n" % str(
                 r11.status_code) + endc)
             logging.info("Received a 2XX Status for People.aspx")
             return destination
         elif str(r11.status_code).startswith("40"):
             print(
-                yellow + "\n[!] Received Status %s.  People search is properly locked down! :) \n" % r11.status_code + endc)
+                yellow + "\n[!] " + endc + "Received Status %s.  People search is properly locked down! :) \n" % r11.status_code + endc)
             return None
         else:
-            print(yellow + "\n[!] Received Unexpected Status %s" % str(r11.status_code) + endc)
+            print(yellow + "\n[!] " + endc + "Received Unexpected Status %s" % str(r11.status_code) + endc)
             return None
 
     except requests.HTTPError:
-        print(red + "\n[X] Error Received.  People.asmx Service is locked down or not there.\n" + endc)
+        print(red + "\n[X] " + endc + "Error Received.  People.asmx Service is locked down or not there.\n" + endc)
     except:
-        print(red + "\n[!] Unknown error during People enumeration\n" + endc)
+        print(red + "\n[!] " + endc + "Unknown error during People enumeration\n" + endc)
 
 
 ###################################################################
@@ -126,11 +127,11 @@ def people_search(target, numres, type):
         numresults = int(numres)
         restype = str(type)
     except:
-        print(red + "[X] Invalid parameter sent to People.asmx searcher" + endc)
+        print(red + "[X] " + endc + "Invalid parameter sent to People.asmx searcher" + endc)
         return 1
 
     # alphabetic search
-    print(green + "\n[*] Beginning alphabetic People search.\n")
+    print(green + "\n[*] " + endc + "Beginning alphabetic People search.\n")
 
     # Perform text enumeration via <searchText> parameter
     for c in ascii_lowercase:
@@ -146,19 +147,20 @@ def people_search(target, numres, type):
             logging.info("Request sent to People.aspx with searchString %s" % c)
 
             # TODO: Regex to filter through returned results and print them here
-            print(green + "\n[*] This is where the results go for %s\n" % c + endc)
+            print(green + "\n[*] " + endc + "This is where the results go for %s\n" % c + endc)
             # regex to match <AccountName> and </AccountName>
             # (?:</?AccountName>)
             # <AccountName>.*</?AccountName>
 
         except requests.HTTPError:
-            logging.error(red + "[!] Got an HTTP error on an already validated People.aspx..That's bad!" + endc)
+            logging.error(
+                red + "[!] " + endc + "Got an HTTP error on an already validated People.aspx..That's bad!" + endc)
 
         except:
-            print(red + "\n[!] Error returned for searchString %s\n" % c + endc)
+            print(red + "\n[!] " + endc + "Error returned for searchString %s\n" % c + endc)
 
     # Special accounts search
-    print("\n[*] Beginning special accounts search.\n")
+    print("\n[*] " + endc + "Beginning special accounts search.\n")
 
     # Begin making requests for specialized accounts
     for s in request_set:
@@ -174,13 +176,13 @@ def people_search(target, numres, type):
             logging.info("Request sent to People.aspx with searchString %s" % s)
 
             # TODO: Regex to filter through returned results and print them here
-            print(green + "[*] This is where the results go for %s" % s + endc)
+            print(green + "[*] " + endc + "This is where the results go for %s" % s + endc)
 
         except requests.HTTPError:
             logging.error("Got an HTTP error on an already validated People.aspx")
 
         except:
-            print(red + "\n[!] Error returned for searchString %s\n" % s + endc)
+            print(red + "\n[!] " + endc + "Error returned for searchString %s\n" % s + endc)
 
 
 # Execution Section

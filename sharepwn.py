@@ -1,9 +1,11 @@
+import argparse
 import logging
 import os
 import sys
 
 import brute_browse
 import people_enum
+import requests
 import url_processor
 import user_id
 import version_id
@@ -12,6 +14,7 @@ __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
 __status__ = "Development"
 
+# Colors for terminal output
 red = "\033[31m"  # usually for errors, [X] items
 cyan = "\033[36m"
 yellow = "\033[33m"  # usually for information and requests, the [?] items
@@ -22,12 +25,18 @@ bold = "\033[1m"
 underline = "\033[4m"
 
 
-# TODO: Move functionality calls outside of if statements and into their own functions
+# TODO: Add Authentication attempts via "from requests_ntlm import HttpNtlmAuth"
+# TODO: HTTPS sites aren't being properly requested by the requests library - need to figure out why and fix
 
 
 # ************************************
 # Begin function definitions section
 # ************************************
+
+
+################################
+# Show the SharePwn banner     #
+################################
 def banner():
     os.system('cls' if os.name == 'nt' else 'clear')
     print("\033[95m" + bold + """
@@ -39,29 +48,53 @@ def banner():
     SharePoint Security Auditing by @_0rigen / 0rigen.net""" + endc)
 
 
-################################
-# The target is a couplet of   #
-# URL and port number, like    #
-# [yahoo.com, 443]             #
-# return array tarout[]        #
-################################
+##################################################
+# check that a url appears to be an SP site      #
+# by checking the headers                        #
+# @target the target url and port                #
+##################################################
+def check(target):
+    url = url_processor.checkhttp(target[0], target[1])
+    try:
+        r = requests.get(url, verify=False)
+        head_check = str(r.headers['microsoftsharepointteamservices'])
+        return head_check
+    except:
+        print (red + "[!] " + endc + "No SharePoint found at the given URL.")
+        return None
+
+
+####################################################
+# The target is a couplet of URL and port number,  #
+#       like [yahoo.com, 443]                      #
+# return array tarout[]                            #
+####################################################
 def changetarget():
-    tarout = []
-    t = raw_input(cyan + "[?] Please enter a target URL now: " + endc)
-    tarout.append(t)
-    tarout.append(changeport())  # Call changeport() to get a new port #
-    tarout[0] = url_processor.checkhttp(tarout[0], tarout[1])  # Process the target string
-    return tarout
+    while True:
+        tarout = []
+        t = raw_input(cyan + "[?] Please enter a target URL now: " + endc)
+        tarout.append(t)
+        tarout.append(changeport())  # Call changeport() to get a new port #
+        tarout[0] = url_processor.checkhttp(tarout[0], tarout[1])  # Process the target string
+        if check(tarout) is not None:
+            return tarout
+        else:
+            continue
 
 
 # Just a little port changing stub to return
 # a numeric port value
+##########################################################
+# changeport() requests and validates a user-defind port #
+# @port - the numeric port value                         #
+##########################################################
 def changeport():
     while True:
         try:
-            port = raw_input(cyan + "[?] Enter target port (usually 80 or 443): " + endc)
+            port = raw_input(cyan + "[?] Enter target port (80 or 443): " + endc)
             port = int(port)
-            break
+            if port == 80 or 443:
+                break
         except:
             print(yellow + "[!] Bad Port.  Try again." + endc)
     return port
@@ -113,11 +146,18 @@ def useridenumeration():
 
     print (green + "\n[!] Brute-Forcing User IDs...\n" + endc)  # Start working...
     FoundUsers = user_id.enumusers(target, mini, maxi)
-    print (yellow + "[*] Users found:" + endc)
-    for user in FoundUsers:
-        print user,
+    if FoundUsers.__len__() != 0:
+        print (yellow + "[*] Users found:" + endc)
+        for user in FoundUsers:
+            print user,
+    else:
+        print(yellow + "[*] No users were found :(" + endc)
 
 
+###################################
+# Show the menu                   #
+# @tar - the target, port couplet #
+###################################
 def showmenu(tar):
     while True:
         print(endc + blue + "\n[*] Targeting: %s:%s [*]" % (tar[0], tar[1]) + endc)
@@ -157,10 +197,13 @@ def showmenu(tar):
 # ************************************
 try:
     # Runtime target holder
-    target = changetarget()
+    target = []
+
+    # Welcome to SharePwn
+    banner()
 
     # This huge comment block contains command-line parsing code.  This will be implemented in a future version #
-    '''
+
     # Parse arguments
     # TODO: Investigate turning arguments into long words, but allowing abbreviation instead of requiring it
     parser = argparse.ArgumentParser()
@@ -202,12 +245,10 @@ try:
     # corresponding functions.                                          #
     #####################################################################
     # (-b) Brute-Force Browsing #
-    # TODO: Verify Brute-Force Browsing results via manual POST requests to services
     if args.b is True:
         bruteforcebrowsing()
 
     # (-p) Picker Enumeration #
-    # TODO: Create Picker enumeration in people_enum.py
     if args.p is True:
         pickerenumeration()
 
@@ -215,11 +256,6 @@ try:
     # TODO: Find a way to display these input options better, or allow users to do it form command line -u argument
     if args.u is True:
         useridenumeration()
-
-    '''
-
-    # Welcome to SharePwn
-    banner()
 
     # Set Logging level (based on command line arg in the future
     logging.basicConfig(stream=sys.stdout, level=logging.ERROR)

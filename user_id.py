@@ -9,10 +9,7 @@ __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
 __status__ = "Development"
 
-# TODO:
-# This checks for successful web requests, but will likely need to actually read the page
-# and identify if valid data was returned or not.  It may just return a 'successful' but blank
-# page if permissions are properly set.
+# TODO: Parse returned UserID page for valid data; avoid false positives from blank pages
 
 red = "\033[31m"  # usually for errors, [X] items
 cyan = "\033[36m"
@@ -35,11 +32,11 @@ def enumusers(target, start=None, end=None):
 
     if start is None:  # Assign default Start and End values
         start = 1
-        sys.stdout.write(yellow + "[!] No start value provided, starting at UID=%d" % start + endc)
+        sys.stdout.write(yellow + "[!] " + endc + "No start value provided, starting at UID=%d" % start + endc)
         sys.stdout.write("\n")
     if end is None:
         end = 10
-        sys.stdout.write(yellow + "[!] No stop value provided, stopping at UID=%d" % end + endc)
+        sys.stdout.write(yellow + "[!] " + endc + "No stop value provided, stopping at UID=%d" % end + endc)
         sys.stdout.write("\n")
 
     # Ensure proper target specification
@@ -61,9 +58,10 @@ def enumusers(target, start=None, end=None):
                 failures.append(i)  # Add to Failures to retry with Force
                 sys.stdout.flush()
         except:  # Handle things that go badly...
-            sys.stdout.write(red + "\n[X] Unexpected Error in enumusers()\n" + endc)
+            sys.stdout.write(red + "\n[X] " + endc + "Unexpected Error in enumusers()\n" + endc)
 
-    sys.stdout.write(yellow + "\n[!] Re-attempting failed IDs with the Force parameter set to True..." + endc)
+    sys.stdout.write(
+        yellow + "\n[!] " + endc + "Re-attempting failed IDs with the Force parameter set to True..." + endc)
     sys.stdout.write("\n")
 
     # Re-request all users with ?Force = True
@@ -81,7 +79,7 @@ def enumusers(target, start=None, end=None):
             else:
                 pass
         except:  # Handle things that go badly...
-            sys.stdout.write(red + "\n[X] Unexpected Error in enumusers(), failures loop" + endc)
+            sys.stdout.write(red + "\n[X] " + endc + "Unexpected Error in enumusers(), failures loop" + endc)
 
         sys.stdout.flush()
 

@@ -1,2 +1,3 @@
 requests
 logging
+requests_ntlm
