@@ -1,6 +1,9 @@
 # SharePwn
 A tool for auditing SharePoint security settings and identifying common security holes.
 
+### Use: ###
+<code>python sharepwn.py</code>
+
 ###Features:###
 * Service Discovery
 * Version Identification
@@ -21,5 +24,5 @@ some of the details.
 
 ### Contributing: ###
 Although I've written and released the initial development version of this tool myself, I am eager
-for any help in further development that I can get.  Create a Pull Request if you'd like to contribue something, 
-or e-mail me at 0rigen[ at ]0rigen [d0t] net to discuss any work.
+for any help in further development that I can get.  I'm not a professional developer and could use the help!
+Create a Pull Request if you'd like to contribue something, or e-mail me at 0rigen[ at ]0rigen [d0t] net to discuss any work.
