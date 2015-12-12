@@ -8,7 +8,7 @@ import url_processor
 
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
-__status__ = "Prototype"
+__status__ = "Development"
 
 red = "\033[31m"  # usually for errors, [X] items
 cyan = "\033[36m"
@@ -62,50 +62,30 @@ def locate(target):
             return loc
 
 
-############################################################################################
-# Uses the people.asmx service to enumerate users, systems, and other accounts.  Begins by
-# performing a response test to see if  the service is properly locked down; abandons
-# the call if an access error is received.
-#
-# @target - the url of the target sp site
-# @text - the string to search for.  ie; "Luke" or "Anakin"
-# @results - the number of results to request
-# @rtype - the type of data to request, usually All.
-############################################################################################
-def people_enum(target, text, results, rtype):
-    gogogo = False
-
+###########################################################
+# find_service - determine if People.asmx is accessible
+# @target - the target site
+# destination - returns full url of the found service
+###########################################################
+def find_service(target):
     url = target[0]
-    port = target[1]
-
-    # Verify input types
-    try:
-        numresults = int(results)
-        restext = str(text)
-        restype = str(rtype)
-    except:
-        print(red + "[X] Invalid parameter sent to People.asmx searcher" + endc)
-        return 1
+    # port = target[1] # Unused
 
     destination = locate(target)
 
     # Set XML Values for dummy request
-    head = people_headers.replace("{{Target}}", url)
-    data = people_data.replace("{{searchString}}", restext)
-    data = data.replace("{{maxResults}}", str(numresults))
-    data = data.replace("{{principalType}}", restype)
+    # head = people_headers.replace("{{Target}}", url) # Unused
+    data = people_data.replace("{{searchString}}", "a")
+    data = data.replace("{{maxResults}}", "100")
+    data = data.replace("{{principalType}}", "All")
 
-    logging.info("\nBuilding People.asmx dummy POST Request with the following parameters: \n")
-    logging.info("%s, %s, %s, %s" % (url, restext, str(numresults), restype))
+    logging.info("\nBuilding People.asmx dummy POST Request\n")
 
     # Build dummy Packet and test responsiveness
     payload = data
 
-    # TODO non-standard ports
-
-    sys.stdout.write(yellow + "\n[*] Sending test request to %s\n" % (destination) + endc)
+    sys.stdout.write(yellow + "\n[*] Sending test request to %s\n" % destination + endc)
     try:
-
         # Manually force HTTP/1.1
         httplib.HTTPConnection._http_vsn = 10
         httplib.HTTPConnection._http_vsn_str = 'HTTP/1.1'
@@ -114,83 +94,97 @@ def people_enum(target, text, results, rtype):
         logging.info("Dummy request sent to People.aspx via HTTP/1.1")
 
         if str(r11.status_code).startswith("2"):
-            print(green + "\n[*] Received Status %s.  People search is available.\n" % str(r11.status_code) + endc)
+            print(green + "\n[*] Received Status %s.  People search is available and not locked down!\n" % str(
+                r11.status_code) + endc)
             logging.info("Received a 2XX Status for People.aspx")
-            gogogo = True
+            return destination
         elif str(r11.status_code).startswith("40"):
             print(
                 yellow + "\n[!] Received Status %s.  People search is properly locked down! :) \n" % r11.status_code + endc)
+            return None
         else:
             print(yellow + "\n[!] Received Unexpected Status %s" % str(r11.status_code) + endc)
+            return None
 
     except requests.HTTPError:
         print(red + "\n[X] Error Received.  People.asmx Service is locked down or not there.\n" + endc)
     except:
         print(red + "\n[!] Unknown error during People enumeration\n" + endc)
 
-    if gogogo == True:
 
-        #
-        # If People.asmx is accessible, start to enumerate all users #
-        # first alphabetically, then by specialized names.           #
-        #
-        print(green + "\n[*] Beginning alphabetic People search.\n")
+###################################################################
+# people_search - if the service is accessible, enumerate users
+#
+# @target - the url of the target sp site
+# @text - the string to search for.  ie; "Luke" or "Anakin"
+# @results - the number of results to request
+# @rtype - the type of data to request, usually All.
+###################################################################
+def people_search(target, numres, type):
+    # Verify input types
+    try:
+        numresults = int(numres)
+        restype = str(type)
+    except:
+        print(red + "[X] Invalid parameter sent to People.asmx searcher" + endc)
+        return 1
 
-        # Perform text enumeration via <searchText> parameter
-        for c in ascii_lowercase:
+    # alphabetic search
+    print(green + "\n[*] Beginning alphabetic People search.\n")
 
-            # Build the request body
-            data = people_data.replace("{{maxResults}}", str(numresults))  # Set max results value
-            data = data.replace("{{principalType}}", restype)  # Set principalType value
-            data = data.replace("{{searchString}}", c)  # Set searchString to single character
-            payload = data
+    # Perform text enumeration via <searchText> parameter
+    for c in ascii_lowercase:
 
-            try:
-                r11 = requests.post(destination, data=payload)  # Send a request with new searchString
-                logging.info("Request sent to People.aspx with searchString %s" % c)
+        # Build the request body
+        data = people_data.replace("{{maxResults}}", str(numresults))  # Set max results value
+        data = data.replace("{{principalType}}", restype)  # Set principalType value
+        data = data.replace("{{searchString}}", c)  # Set searchString to single character
+        payload = data
 
-                # TODO: Regex to filter through returned results and print them here
-                print(green + "\n[*] This is where the results go for %s\n" % c + endc)
-                #
-                #
-                # regex to match <AccountName> and </AccountName>
-                # (?:</?AccountName>)
-                # <AccountName>.*</?AccountName>
+        try:
+            r11 = requests.post(destination, data=payload)  # Send a request with new searchString
+            logging.info("Request sent to People.aspx with searchString %s" % c)
 
-            except requests.HTTPError:
-                logging.error(red + "[!] Got an HTTP error on an already validated People.aspx..That's bad!" + endc)
+            # TODO: Regex to filter through returned results and print them here
+            print(green + "\n[*] This is where the results go for %s\n" % c + endc)
+            # regex to match <AccountName> and </AccountName>
+            # (?:</?AccountName>)
+            # <AccountName>.*</?AccountName>
 
-            except:
-                print(red + "\n[!] Error returned for searchString %s\n" % c + endc)
+        except requests.HTTPError:
+            logging.error(red + "[!] Got an HTTP error on an already validated People.aspx..That's bad!" + endc)
 
-        #
-        # Special accounts search
-        #
-        print("\n[*] Beginning special accounts search.\n")
+        except:
+            print(red + "\n[!] Error returned for searchString %s\n" % c + endc)
 
-        # Begin making requests for specialized accounts
-        for s in request_set:
+    # Special accounts search
+    print("\n[*] Beginning special accounts search.\n")
 
-            # Build the request body
-            data = people_data.replace("{{maxResults}}", str(numresults))  # Set max results value
-            data = data.replace("{{principalType}}", restype)  # Set principalType value
-            data = data.replace("{{searchString}}", c)  # Set searchString to single character
-            payload = data
+    # Begin making requests for specialized accounts
+    for s in request_set:
 
-            try:
-                r11 = requests.post(destination, data=payload)  # Send a request with new searchString
-                logging.info("Request sent to People.aspx with searchString %s" % s)
+        # Build the request body
+        data = people_data.replace("{{maxResults}}", str(numresults))  # Set max results value
+        data = data.replace("{{principalType}}", restype)  # Set principalType value
+        data = data.replace("{{searchString}}", s)  # Set searchString to single character
+        payload = data
 
-                # TODO: Regex to filter through returned results and print them here
-                print(green + "[*] This is where the results go for %s" % s + endc)
-                #
-                #
+        try:
+            r11 = requests.post(destination, data=payload)  # Send a request with new searchString
+            logging.info("Request sent to People.aspx with searchString %s" % s)
 
-            except requests.HTTPError:
-                logging.error("Got an HTTP error on an already validated People.aspx")
+            # TODO: Regex to filter through returned results and print them here
+            print(green + "[*] This is where the results go for %s" % s + endc)
 
-            except:
-                print(red + "\n[!] Error returned for searchString %s\n" % s + endc)
+        except requests.HTTPError:
+            logging.error("Got an HTTP error on an already validated People.aspx")
 
-    elif gogogo == False:
-        print(red + "[!] People Service Query Complete.  The service is locked down or non-existent.\n" + endc)
+        except:
+            print(red + "\n[!] Error returned for searchString %s\n" % s + endc)
+
+
+# Execution Section
+def search(target):
+    dst = find_service(target)
+    if dst is not None:
+        people_search(dst, 1000, "All")

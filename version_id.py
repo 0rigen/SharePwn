@@ -6,7 +6,7 @@ import url_processor
 
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
-__status__ = "Prototype"
+__status__ = "Development"
 
 red = "\033[31m"  # usually for errors, [X] items
 cyan = "\033[36m"

@@ -10,7 +10,7 @@ import version_id
 
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
-__status__ = "Prototype"
+__status__ = "Development"
 
 red = "\033[31m"  # usually for errors, [X] items
 cyan = "\033[36m"
@@ -84,7 +84,7 @@ def version():
 # Picker Enumeration #
 ######################
 def peopleenumeration():
-    people_enum.people_enum(target, "admin", 1000, "All")
+    people_enum.search(target)
 
 
 #######################
@@ -121,30 +121,32 @@ def showmenu(tar):
         print(cyan + "Please choose an option below: \n")
         print("[" + yellow + "V" + endc + cyan + "]ersion Identification")
         print("[" + yellow + "B" + endc + cyan + "]rute Force Browsing")
-        print("[" + yellow + "S" + endc + cyan + "]ervice Access Testing")
+        # print("[" + yellow + "S" + endc + cyan + "]ervice Access Testing")
         print("[" + yellow + "P" + endc + cyan + "]eople Service Enumeration")
         print("[" + yellow + "U" + endc + cyan + "]serID Brute Force Search")
         print("[" + yellow + "T" + endc + cyan + "]arget (Change your target URL/Protocol)")
-        print("[" + yellow + "O" + endc + cyan + "]utput Redirection (Print to a file)")
+        #print("[" + yellow + "O" + endc + cyan + "]utput Redirection (Print to a file)")
         print("[" + yellow + "Q" + endc + cyan + "]uit and go home")
         choice = raw_input("Command: " + endc)
         if choice.capitalize() == 'V':
             version()
-        if choice.capitalize() == 'B':
+        elif choice.capitalize() == 'B':
             bruteforcebrowsing()
-        elif choice.capitalize() == 'S':
-            print("\nNot yet implemented\n")
+        # elif choice.capitalize() == 'S':
+        #    print("\nNot yet implemented\n")
         elif choice.capitalize() == 'P':
             peopleenumeration()
         elif choice.capitalize() == 'U':
             useridenumeration()
         elif choice.capitalize() == 'T':
             tar = changetarget()
-        elif choice.capitalize() == 'O':
-            print("\nNot yet implemented\n")
+        # elif choice.capitalize() == 'O':
+        #    print("\nNot yet implemented\n")
         elif choice.capitalize() == 'Q':
             print("Quitting!")
             sys.exit(0)
+        else:
+            print(yellow + bold + "[!] Command not understood; try again, buddy!" + endc)
 
 
 # ************************************
@@ -227,7 +229,7 @@ try:
 # Handle Exceptions #
 #####################
 except KeyboardInterrupt:
-    print(red + "\n\n[!] Caught keyboard interrupt.  Bye?" + endc)
+    print(red + bold + "\n\n[!] Caught keyboard interrupt.  Bye?" + endc)
     sys.exit(0)
 except:
     print(red + bold + "\n[X] Unknown error" + endc)
