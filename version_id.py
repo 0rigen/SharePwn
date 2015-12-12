@@ -69,7 +69,7 @@ def identify(url, port=None):
         logging.info("Version ID failed; successful request but no version information found.")
     else:
         ver = str(sp_match)  # Store the version info and return
-        print(green + "\n[*] SharePoint version identified as " + bold + "%s" % ver + endc),
+        print(green + "\n[*] SharePoint version identified as " + bold + "%s;" % ver + endc),
         logging.info("SP Version ID successful. Found %s" % ver)
         if ver.startswith("6"):
             print(green + bold + "SharePoint 2003" + endc)
