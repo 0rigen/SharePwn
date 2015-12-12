@@ -118,7 +118,6 @@ def useridenumeration():
         print user,
 
 
-
 def showmenu(tar):
     while True:
         print(endc + blue + "\n[*] Targeting: %s:%s [*]" % (tar[0], tar[1]) + endc)
@@ -129,7 +128,7 @@ def showmenu(tar):
         print("[" + yellow + "P" + endc + cyan + "]eople Service Enumeration")
         print("[" + yellow + "U" + endc + cyan + "]serID Brute Force Search")
         print("[" + yellow + "T" + endc + cyan + "]arget (Change your target URL/Protocol)")
-        #print("[" + yellow + "O" + endc + cyan + "]utput Redirection (Print to a file)")
+        # print("[" + yellow + "O" + endc + cyan + "]utput Redirection (Print to a file)")
         print("[" + yellow + "Q" + endc + cyan + "]uit and go home")
         choice = raw_input("Command: " + endc)
         if choice.capitalize() == 'V':
@@ -224,7 +223,6 @@ try:
 
     # Set Logging level (based on command line arg in the future
     logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
-
 
     # Either no command-line functions were specified or their runs have completed.  Go back to the menu...
     showmenu(target)
