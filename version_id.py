@@ -61,6 +61,7 @@ def identify(url, port=None):
     sp_match = r.headers['microsoftsharepointteamservices']
     asp_match = r.headers['x-aspnet-version']
     serv_match = r.headers['server']
+    health_match = r.headers['x-sharepointhealthscore']
 
     # Process SharePoint version
     if sp_match is None:  # No version info returned
@@ -97,4 +98,6 @@ def identify(url, port=None):
         print(green + "\n[*] Server version identified as " + bold + "%s" % ver + endc)
         logging.info("Server version ID successful. Found %s" % ver)
 
-    return ver
+        # Print Health Score
+        ver = str(health_match)  # Store the version info and return
+        print(green + "\n[*] Health Score: " + bold + "%s" % ver + endc)
