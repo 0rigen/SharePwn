@@ -1,10 +1,10 @@
-import httplib
 import logging
 import sys
 from string import ascii_lowercase
 
 import requests
 import url_processor
+from requests import Session
 
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
@@ -19,8 +19,9 @@ endc = "\033[0m"
 bold = "\033[1m"
 underline = "\033[4m"
 
-# Although this header is declared, requests does not use it currently.  If I need this,
-# I'll have to manually tell it to use this header data.
+# TODO Try and spoof request as if it were coming from the local machine
+# host resolution, then spoof in packet?
+
 people_headers = """
 POST /_vti_bin/People.asmx HTTP/{{http}}
 Host: {{Target}}
@@ -40,8 +41,26 @@ people_data = """
    </soap:Body>
 </soap:Envelope>
 """
-
 request_set = ['$', 'SYSTEM', 'AUTHORITY', 'admin', 'Administrator', 'administrator', 'Admin', '\\']
+
+
+######################################################################
+# create_header creates a custom header for each unique request      #
+# @target -  the target domain like sp.domain.com                    #
+# @location - the People.asmx location, like /_vti_bin/People.asmx   #
+# @ http - the HTTP version to use; defaults to 1.1 if not provided  #
+# ret_header - the custom header to be returned                      #
+######################################################################
+def create_header(target, location, agent=None, http=None):
+    # Default to HTTP/1.1
+    if http is None:
+        http = "1.1"
+    # Fill in the blanks...
+    # ret_header = people_headers.replace("{{location}}", location)
+    ret_header = people_headers.replace("{{Target}}", target[0])
+    ret_header = ret_header.replace("{{http}}", http)
+    ret_header = ret_header.replace("{{length}}", "1")
+    return ret_header
 
 
 ###########################################################
@@ -49,10 +68,14 @@ request_set = ['$', 'SYSTEM', 'AUTHORITY', 'admin', 'Administrator', 'administra
 # @target - the url.port couplet of the target            #
 # loc - returns the location where People.asmx was found  #
 ###########################################################
+# TODO Need to change how I do this.  The /_vti_bin/People.asmx is constant
 def locate(target):
     # Potential locations
-    locations = ['/', '/Search']
+    locations = ['/', '/Search', '/sites/us/en']
+    # i = locations.__len__()
     serv = "_vti_bin/People.asmx"
+
+    # Loop over common locations, trying to ID the service
     for option in locations:
         loc = target[0] + option + serv
         loc = url_processor.checkhttp(loc, target[1])
@@ -60,6 +83,18 @@ def locate(target):
         if str(r.status_code).startswith("200"):
             print(yellow + "[*] " + endc + "Located People.asmx at: %s" % loc)
             return loc
+        # i+=1
+        else:
+            continue
+
+    # If we get this far, we couldn't find People.asmx
+    print(yellow + "[!]" + endc + "Failed to locate the People.asmx service in common locations.")
+    con = raw_input(yelow + "[?]" + endc + "Specify the location manually? (Y/N): ")
+    if con.capitalize() == "Y":
+        loc = raw_input(cyan + "[?]" + endc + "URL of People.asmx [Format: http://domain.com/People.asmx]:")
+        return loc
+    else:
+        return None
 
 
 ###########################################################
@@ -69,40 +104,55 @@ def locate(target):
 ###########################################################
 def find_service(target):
     url = target[0]
+    fakeagent = "'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'"
     # port = target[1] # Unused
 
     destination = locate(target)
 
     # Set XML Values for dummy request
-    # head = people_headers.replace("{{Target}}", url) # Unused
-    data = people_data.replace("{{searchString}}", "a")
-    data = data.replace("{{maxResults}}", "100")
-    data = data.replace("{{principalType}}", "All")
+    # TODO Move this into a create_payload() function
+    header = create_header(target, destination, fakeagent, "1.1")
+    payload = people_data.replace("{{searchString}}", "a")
+    payload = payload.replace("{{maxResults}}", "100")
+    payload = payload.replace("{{principalType}}", "All")
 
     logging.info("\nBuilding People.asmx dummy POST Request\n")
 
     # Build dummy Packet and test responsiveness
-    payload = data
+    # payload = data
 
     sys.stdout.write(yellow + "\n[*] " + endc + "Sending test request to %s\n" % destination + endc)
     try:
-        # Manually force HTTP/1.1
-        httplib.HTTPConnection._http_vsn = 10
-        httplib.HTTPConnection._http_vsn_str = 'HTTP/1.1'
-        # Send a dummy request to see if it gets processed
-        r11 = requests.post(destination, data=payload)
+        # TODO Move this stuff into a test connection -type of method
+        s = Session()
+        req = requests.Request('POST', str(url), data=payload, headers=header)
+        # TODO Failing to prepare()
+        prepped = req.prepare()
+        resp = s.send(prepped, verify=False)
+        print resp.text
+        print resp.status_code
+
         logging.info("Dummy request sent to People.aspx via HTTP/1.1")
 
+        # Request seemed to work
         if str(r11.status_code).startswith("2"):
             print(
-            green + "\n[*] " + endc + "Received Status %s.  People search is available and not locked down!\n" % str(
-                r11.status_code) + endc)
+                green + "\n[*] " + endc + "Received Status %s.  People search is available and not locked down!\n" % str(
+                        r11.status_code) + endc)
             logging.info("Received a 2XX Status for People.aspx")
             return destination
-        elif str(r11.status_code).startswith("40"):
+
+        # Service is locked down
+        elif str(r11.status_code).startswith("403") or str(r11.status_code).startswith("401"):
             print(
                 yellow + "\n[!] " + endc + "Received Status %s.  People search is properly locked down! :) \n" % r11.status_code + endc)
             return None
+
+        # Bad Request - something weird happened...
+        elif str(r11.status_code).startswith("400"):
+            print(red + "[!]" + endc + " Received HTTP 400 Response: Bad Request.  hmmm...")
+
+        # All else
         else:
             print(yellow + "\n[!] " + endc + "Received Unexpected Status %s" % str(r11.status_code) + endc)
             return None
@@ -154,7 +204,7 @@ def people_search(target, numres, type):
 
         except requests.HTTPError:
             logging.error(
-                red + "[!] " + endc + "Got an HTTP error on an already validated People.aspx..That's bad!" + endc)
+                    red + "[!] " + endc + "Got an HTTP error on an already validated People.aspx..That's bad!" + endc)
 
         except:
             print(red + "\n[!] " + endc + "Error returned for searchString %s\n" % c + endc)
@@ -190,3 +240,20 @@ def search(target):
     dst = find_service(target)
     if dst is not None:
         people_search(dst, 1000, "All")
+
+
+def pretty_print_POST(req):
+    """
+    At this point it is completely built and ready
+    to be fired; it is "prepared".
+
+    However pay attention at the formatting used in
+    this function because it is programmed to be pretty
+    printed and may differ from the actual request.
+    """
+    print('{}\n{}\n{}\n\n{}'.format(
+            '-----------START-----------',
+            req.method + ' ' + req.url,
+            '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
+            req.body,
+    ))

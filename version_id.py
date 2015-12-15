@@ -27,6 +27,7 @@ underline = "\033[4m"
 
 # TODO Research what difference the version makes to interrogation functions.
 # TODO Different service names and standards, etc.
+# TODO Version ID fails over HTTPS - can I fix that?
 
 
 ####################################################
@@ -98,6 +99,10 @@ def identify(url, port=None):
         print(green + "\n[*] Server version identified as " + bold + "%s" % ver + endc)
         logging.info("Server version ID successful. Found %s" % ver)
 
-        # Print Health Score
+    # Print Health Score
+    if health_match is None:
+        print(yellow + "[!] No health score information returned." + endc)
+        logging.info("Health Score retrieval failed.")
+    else:
         ver = str(health_match)  # Store the version info and return
         print(green + "\n[*] Health Score: " + bold + "%s" % ver + endc)
