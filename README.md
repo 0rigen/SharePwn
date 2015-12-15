@@ -2,6 +2,9 @@
 A tool for auditing SharePoint security settings and identifying common security holes.
 
 ### Use: ###
+Install Dependencies:
+<code>pip install -r requirements.txt</code>
+Run:
 <code>python sharepwn.py</code>
 
 ###Features:###
