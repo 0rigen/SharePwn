@@ -1,3 +1,5 @@
 requests>=2.8.1
 logging
 requests_ntlm>=0.2.0
+BeautifulSoup
+
