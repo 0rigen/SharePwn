@@ -1,10 +1,8 @@
 import logging
 import sys
 from string import ascii_lowercase
-
+# TODO Use BeautifulSoup to parse the XML responses from asmx service
 import requests
-import url_processor
-from requests import Session
 
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
@@ -22,15 +20,13 @@ underline = "\033[4m"
 # TODO Try and spoof request as if it were coming from the local machine
 # host resolution, then spoof in packet?
 
-people_headers = """
-POST /_vti_bin/People.asmx HTTP/{{http}}
+people_headers = """POST /_vti_bin/People.asmx HTTP/{{http}}
 Host: {{Target}}
 Content-Type: text/xml; charset=utf-8
 Content-Length: {{length}}
 SOAPAction: "http://schemas.microsoft.com/sharepoint/soap/SearchPrincipals"
 """
-people_data = """
-<?xml version="1.0" encoding="utf-8"?>
+people_data = """<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <SearchPrincipals xmlns="http://schemas.microsoft.com/sharepoint/soap/">
@@ -78,7 +74,7 @@ def locate(target):
     # Loop over common locations, trying to ID the service
     for option in locations:
         loc = target[0] + option + serv
-        loc = url_processor.checkhttp(loc, target[1])
+        # loc = url_processor.checkhttp(loc, target[1]) # This should now be redundant
         r = requests.get(loc)
         if str(r.status_code).startswith("200"):
             print(yellow + "[*] " + endc + "Located People.asmx at: %s" % loc)
@@ -123,38 +119,34 @@ def find_service(target):
 
     sys.stdout.write(yellow + "\n[*] " + endc + "Sending test request to %s\n" % destination + endc)
     try:
-        # TODO Move this stuff into a test connection -type of method
-        s = Session()
-        req = requests.Request('POST', str(url), data=payload, headers=header)
-        # TODO Failing to prepare()
-        prepped = req.prepare()
-        resp = s.send(prepped, verify=False)
-        print resp.text
-        print resp.status_code
+        # TODO Move this stuff into a test connection type of method
+        # I have to manually specify the content-type, or requests will use the wrong format and the request returns 415 code
+        req = requests.post(destination, data=payload, allow_redirects=True,
+                            headers={"Content-Type": "text/xml; charset=utf-8"})
 
-        logging.info("Dummy request sent to People.aspx via HTTP/1.1")
+        logging.info("Dummy request sent to People.aspx")
 
         # Request seemed to work
-        if str(r11.status_code).startswith("2"):
+        if str(req.status_code).startswith("2"):
             print(
                 green + "\n[*] " + endc + "Received Status %s.  People search is available and not locked down!\n" % str(
-                        r11.status_code) + endc)
+                        req.status_code) + endc)
             logging.info("Received a 2XX Status for People.aspx")
             return destination
 
         # Service is locked down
-        elif str(r11.status_code).startswith("403") or str(r11.status_code).startswith("401"):
+        elif str(req.status_code).startswith("403") or str(req.status_code).startswith("401"):
             print(
-                yellow + "\n[!] " + endc + "Received Status %s.  People search is properly locked down! :) \n" % r11.status_code + endc)
+                yellow + "\n[!] " + endc + "Received Status %s.  You do not have permission to use the service. \n" % req.status_code + endc)
             return None
 
         # Bad Request - something weird happened...
-        elif str(r11.status_code).startswith("400"):
+        elif str(req.status_code).startswith("400"):
             print(red + "[!]" + endc + " Received HTTP 400 Response: Bad Request.  hmmm...")
 
         # All else
         else:
-            print(yellow + "\n[!] " + endc + "Received Unexpected Status %s" % str(r11.status_code) + endc)
+            print(yellow + "\n[!] " + endc + "Received Unexpected Status %s" % str(req.status_code) + endc)
             return None
 
     except requests.HTTPError:
@@ -184,33 +176,37 @@ def people_search(target, numres, type):
     print(green + "\n[*] " + endc + "Beginning alphabetic People search.\n")
 
     # Perform text enumeration via <searchText> parameter
-    for c in ascii_lowercase:
+    try:
+        for c in ascii_lowercase:
 
-        # Build the request body
-        data = people_data.replace("{{maxResults}}", str(numresults))  # Set max results value
-        data = data.replace("{{principalType}}", restype)  # Set principalType value
-        data = data.replace("{{searchString}}", c)  # Set searchString to single character
-        payload = data
+            # Build the request body
+            data = people_data.replace("{{maxResults}}", str(numresults))  # Set max results value
+            data = data.replace("{{principalType}}", restype)  # Set principalType value
+            data = data.replace("{{searchString}}", c)  # Set searchString to single character
+            payload = data
 
-        try:
-            r11 = requests.post(destination, data=payload)  # Send a request with new searchString
-            logging.info("Request sent to People.aspx with searchString %s" % c)
+            try:
+                r11 = requests.post(target, data=payload)  # Send a request with new searchString
+                logging.info("Request sent to People.aspx with searchString %s" % c)
 
-            # TODO: Regex to filter through returned results and print them here
-            print(green + "\n[*] " + endc + "This is where the results go for %s\n" % c + endc)
-            # regex to match <AccountName> and </AccountName>
-            # (?:</?AccountName>)
-            # <AccountName>.*</?AccountName>
+                ## *** PARSE RESULTS *** ## INCOMPLETE
+                print(green + "\n[*] " + endc + "This is where the results go for %s\n" % c + endc)
+                soup = BS(r11.content)
+                print soup.find('AccountName').text
 
-        except requests.HTTPError:
-            logging.error(
-                    red + "[!] " + endc + "Got an HTTP error on an already validated People.aspx..That's bad!" + endc)
+            except requests.HTTPError:
+                logging.error(
+                        red + "[!] " + endc + "Got an HTTP error on an already validated People.aspx..That's bad!" + endc)
+            except:
+                print(red + "\n[!] " + endc + "Error returned for searchString %s\n" % c + endc)
 
-        except:
-            print(red + "\n[!] " + endc + "Error returned for searchString %s\n" % c + endc)
+    except KeyboardInterrupt:
+        print(yellow + "[!] " + endc + "Search Interrupted by YOU!\n")
+    except:
+        print(red + "[!] " + endc + "Unknown error occurred during search\n")
 
     # Special accounts search
-    print("\n[*] " + endc + "Beginning special accounts search.\n")
+    print(green + "\n[*] " + endc + "Beginning special accounts search.\n")
 
     # Begin making requests for specialized accounts
     for s in request_set:
@@ -240,20 +236,3 @@ def search(target):
     dst = find_service(target)
     if dst is not None:
         people_search(dst, 1000, "All")
-
-
-def pretty_print_POST(req):
-    """
-    At this point it is completely built and ready
-    to be fired; it is "prepared".
-
-    However pay attention at the formatting used in
-    this function because it is programmed to be pretty
-    printed and may differ from the actual request.
-    """
-    print('{}\n{}\n{}\n\n{}'.format(
-            '-----------START-----------',
-            req.method + ' ' + req.url,
-            '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
-            req.body,
-    ))

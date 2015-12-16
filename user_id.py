@@ -9,7 +9,7 @@ __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
 __status__ = "Development"
 
-# TODO: Parse returned UserID page for valid data; avoid false positives from blank pages
+# TODO: Parse returned UserID page for valid data
 
 red = "\033[31m"  # usually for errors, [X] items
 cyan = "\033[36m"
@@ -50,8 +50,13 @@ def enumusers(target, start=None, end=None):
 
         try:
             page = requests.get(r)  # Open the page
-            code_match = re.search("[2**]", str(page.status_code))  # Check for success code 2xx
-            if code_match is not None:
+
+            # Check for 2xx HTTP response and false positive indicators
+            code_match = re.search("[2**]", str(page.status_code))
+            nf_match = re.search("Not Found",
+                                 page._content)  # Gotta regex for Not Found to avoid capitalization variations
+
+            if code_match is not None and page._content.__contains__("404") is False and nf_match is None:
                 results.append(i)  # Add to results if successful
                 sys.stdout.flush()
             else:
@@ -61,7 +66,7 @@ def enumusers(target, start=None, end=None):
             sys.stdout.write(red + "\n[X] " + endc + "Unexpected Error in enumusers()\n" + endc)
 
     sys.stdout.write(
-        yellow + "\n[!] " + endc + "Re-attempting failed IDs with the Force parameter set to True..." + endc)
+            yellow + "\n[!] " + endc + "Re-attempting failed IDs with the Force parameter set to True..." + endc)
     sys.stdout.write("\n")
 
     # Re-request all users with ?Force = True
@@ -73,7 +78,10 @@ def enumusers(target, start=None, end=None):
         try:
             page = requests.get(r)  # Open the page
             code_match = re.search("[2**]", str(page.status_code))  # Check for success code 2xx
-            if code_match is not None:
+            nf_match = re.search("Not Found",
+                                 page._content)  # Gotta regex for Not Found to avoid capitalization variations
+
+            if code_match is not None and page._content.__contains__("404") is False and nf_match is None:
                 results.append(user)  # Add to results if successful, remove from Failures
                 failures.remove(user)
             else:

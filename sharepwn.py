@@ -14,6 +14,9 @@ __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
 __status__ = "Development"
 
+# Let's suppress unverified HTTPS warnings...
+requests.packages.urllib3.disable_warnings()
+
 # Colors for terminal output
 red = "\033[31m"  # usually for errors, [X] items
 cyan = "\033[36m"
@@ -26,8 +29,9 @@ underline = "\033[4m"
 
 
 # TODO: Add Authentication attempts via "from requests_ntlm import HttpNtlmAuth"
-# TODO: HTTPS sites aren't being properly requested by the requests library - need to figure out why and fix
-
+# TODO: Add Authentication via cookies
+# TODO: Explore moving my web requests into a single function rather than being spread throughout the program
+# TODO: Add timeout to requests to prevent hangs
 
 # ************************************
 # Begin function definitions section
@@ -60,7 +64,7 @@ def check(target):
         head_check = str(r.headers['microsoftsharepointteamservices'])
         return head_check
     except:
-        print (red + "[!] " + endc + "No SharePoint found at the given URL.")
+        print (red + "[!] " + endc + "No SharePoint found at the given URL.  Check your URL and port specification.")
         return None
 
 
@@ -71,12 +75,14 @@ def check(target):
 ####################################################
 def changetarget():
     while True:
-        tarout = []
+        tarout = ["", ""]
         t = raw_input(cyan + "[?] Please enter a target URL now: " + endc)
-        tarout.append(t)
-        tarout.append(changeport())  # Call changeport() to get a new port #
-        tarout[0] = url_processor.checkhttp(tarout[0], tarout[1])  # Process the target string
+        tarout[0] = t
+        target[0] = t  # Put on global var...cause I gotta
+        tarout[1] = changeport()  # Call changeport() to get a new port #
+        tarout[0] = url_processor.checkhttp(t, tarout[1])  # Process the target string
         if check(tarout) is not None:
+            # With the new port, go ahead and correct the target specification for the protocol
             return tarout
         else:
             continue
@@ -97,33 +103,40 @@ def changeport():
                 break
         except:
             print(yellow + "[!] Bad Port.  Try again." + endc)
+
+    # With the new port, go ahead and correct the target specification for the protocol
+    target[0] = url_processor.checkhttp(target[0], port)
+
     return port
 
 
 ########################
 # Brute Force Browsing #
 ########################
-def bruteforcebrowsing():
+def bruteforcebrowsing(target):
     print (yellow + "\n[!] Beginning brute force browsing...\n" + endc)
-    finds = brute_browse.geturl_list(target[0], "browse_list.txt")  # Brute force and save results
+    finds = brute_browse.geturl_list(target, "browse_list.txt")  # Brute force and save results
     print ("\n")
 
 
-def version():
+##########################
+# Version Identification #
+##########################
+def version(target):
     version_id.identify(target[0], target[1])
 
 
 ######################
 # Picker Enumeration #
 ######################
-def peopleenumeration():
+def peopleenumeration(target):
     people_enum.search(target)
 
 
 #######################
 # User ID Enumeration #
 #######################
-def useridenumeration():
+def useridenumeration(target):
     b = True
 
     while b is True:
@@ -147,7 +160,7 @@ def useridenumeration():
     print (green + "\n[!] Brute-Forcing User IDs...\n" + endc)  # Start working...
     FoundUsers = user_id.enumusers(target, mini, maxi)
     if FoundUsers.__len__() != 0:
-        print (yellow + "[*] Users found:" + endc)
+        print (yellow + "[*] Users found:\n" + endc)
         for user in FoundUsers:
             print user,
     else:
@@ -172,22 +185,22 @@ def showmenu(tar):
         print("[" + yellow + "Q" + endc + cyan + "]uit and go home")
         choice = raw_input("Command: " + endc)
         if choice.capitalize() == 'V':
-            version()
+            version(tar)
         elif choice.capitalize() == 'B':
-            bruteforcebrowsing()
+            bruteforcebrowsing(tar)
         # elif choice.capitalize() == 'S':
         #    print("\nNot yet implemented\n")
         elif choice.capitalize() == 'P':
-            peopleenumeration()
+            peopleenumeration(tar)
         elif choice.capitalize() == 'U':
-            useridenumeration()
+            useridenumeration(tar)
         elif choice.capitalize() == 'T':
             tar = changetarget()
         # elif choice.capitalize() == 'O':
         #    print("\nNot yet implemented\n")
         elif choice.capitalize() == 'Q':
-            print("Quitting!")
-            sys.exit(0)
+            print(yellow + "[*]" + endc + " Shutting down...")
+            sys.exit()
         else:
             print(yellow + bold + "[!] Command not understood; try again, buddy!" + endc)
 
@@ -197,20 +210,19 @@ def showmenu(tar):
 # ************************************
 try:
     # Runtime target holder
-    target = []
+    target = ["", ""]
 
     # Welcome to SharePwn
     banner()
 
-    # This huge comment block contains command-line parsing code.  This will be implemented in a future version #
-
     # Parse arguments
     # TODO: Investigate turning arguments into long words, but allowing abbreviation instead of requiring it
     parser = argparse.ArgumentParser()
-    parser.add_argument("-target", type=str, help="URL of the target SP site")
-    parser.add_argument("-port", type=str, help="Port/Protocol to target (80 or 443)")
+    parser.add_argument("-t", type=str, help="URL of the target SP site")
+    parser.add_argument("-p", type=str, help="Port/Protocol to target (80 or 443)")
+    parser.add_argument("-v", help="Perform Version Detection", action='store_true')
     parser.add_argument("-b", help="Perform Brute-Force Browsing", action='store_true')
-    parser.add_argument("-p", help="Perform Enumeration via Picker Service", action='store_true')
+    parser.add_argument("-pe", help="Perform Enumeration via Picker Service", action='store_true')
     parser.add_argument("-u", help="Perform Brute-Force User ID Search", action='store_true')
     # TODO: Add command line argument to set the debug level
     # TODO: Handle file output throughout program (probably should be a final clean-up item)
@@ -227,12 +239,13 @@ try:
     #####################################################################################
 
     # If the user was nice and provided both target and port #...
-    if args.target is not None:
-        if args.port is not None:
-            target[0] = args.target
-            target[1] = args.port
+    if args.t is not None:
+        if args.p is not None:
+            target[0] = args.t
+            target[1] = int(args.p)
+            target[0] = url_processor.checkhttp(target[0], target[1])
             # If the user provided a target but no port
-        elif args.port is None:
+        elif args.p and args.port is None:
             target[1] = changeport()
     # Else, no target was specified, and we handle (1) and (2) as a single case
     else:
@@ -244,18 +257,22 @@ try:
     # via commnad line args.  Here, we catch those args and run the     #
     # corresponding functions.                                          #
     #####################################################################
+    # (-v) Version Detection #
+    if args.v is True:
+        version_id.identify(target[0], target[1])
+
     # (-b) Brute-Force Browsing #
     if args.b is True:
-        bruteforcebrowsing()
+        bruteforcebrowsing(target)
 
     # (-p) Picker Enumeration #
-    if args.p is True:
-        pickerenumeration()
+    if args.pe is True:
+        peopleenumeration(target)
 
     # (-u) UserID Enumeration #
     # TODO: Find a way to display these input options better, or allow users to do it form command line -u argument
     if args.u is True:
-        useridenumeration()
+        useridenumeration(target)
 
     # Set Logging level (based on command line arg in the future
     logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
