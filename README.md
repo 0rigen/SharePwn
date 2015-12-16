@@ -7,8 +7,18 @@ Install Dependencies:
 Run:
 <code>python sharepwn.py</code>
 <br /><br />
-OR Call specific functionality from the command-line:<br />
-<code> python sharepwn.py -t [target] -p [port] -[v,b,u,pe] </code>
+OR <br />
+Call specific functionality from the command-line:<br />
+<code>usage: sharepwn.py [-h] [-t T] [-p P] [-v] [-b] [-pe] [-u]<br />
+<br />
+optional arguments:<br />
+  -h, --help  show this help message and exit<br />
+  -t T        URL of the target SP site<br />
+  -p P        Port/Protocol to target (80 or 443)<br />
+  -v          Perform Version Detection<br />
+  -b          Perform Brute-Force Browsing<br />
+  -pe         Perform Enumeration via Picker Service<br />
+  -u          Perform Brute-Force User ID Search<br /></code>
 
 ###Features:###
 * Service Discovery
