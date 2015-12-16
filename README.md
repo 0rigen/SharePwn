@@ -12,7 +12,7 @@ Call specific functionality from the command-line:<br />
 <code>usage: sharepwn.py [-h] [-t T] [-p P] [-v] [-b] [-pe] [-u]<br />
 <br />
 optional arguments:<br />
-&nbsp;&nbsp;-h,&nbsp;--help&nbsp;&nbsp;show this help message and exit<br />
+&nbsp;&nbsp;-h,&nbsp;--help&nbsp;&nbsp;show this help message and exit<br>
 &nbsp;&nbsp;-t&nbsp;T&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL of the target SP site<br />
 &nbsp;&nbsp;-p&nbsp;P&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Port/Protocol to target (80 or 443)<br />
 &nbsp;&nbsp;-v&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Version Detection<br />
