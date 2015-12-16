@@ -8,8 +8,8 @@ Run:
 <code>python sharepwn.py</code>
 <br />
 -or-<br />
-Call specific functionality from the command-line:<br />
-usage: sharepwn.py [-h] [-t T] [-p P] [-v] [-b] [-pe] [-u]<br />
+Call specific functionality from the command-line:<br /><br />
+usage: <code>sharepwn.py [-h] [-t T] [-p P] [-v] [-b] [-pe] [-u]</code><br />
 <br />
 optional arguments:<br />
 &nbsp;&nbsp;-h,&nbsp;--help&nbsp;&nbsp;show this help message and exit<br />
