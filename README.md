@@ -17,7 +17,7 @@ optional arguments:<br />
 &nbsp;&nbsp;-p&nbsp;P&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Port/Protocol to target (80 or 443)<br />
 &nbsp;&nbsp;-v&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Version Detection<br />
 &nbsp;&nbsp;-b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Brute-Force Browsing<br />
-&nbsp;&nbsp;-pe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Enumeration via Picker Service<br />
+&nbsp;&nbsp;-pe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Enumeration via People Service<br />
 &nbsp;&nbsp;-u&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Brute-Force User ID Search<br />
 
 ###Features:###
