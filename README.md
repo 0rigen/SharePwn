@@ -10,7 +10,7 @@ Run:
 OR <br />
 Call specific functionality from the command-line:<br />
 <code>usage: sharepwn.py [-h] [-t T] [-p P] [-v] [-b] [-pe] [-u]<br />
-<br />
+<br /><p>
 optional arguments:<br />
   -h, --help  show this help message and exit<br />
   -t T        URL of the target SP site<br />
@@ -18,7 +18,7 @@ optional arguments:<br />
   -v          Perform Version Detection<br />
   -b          Perform Brute-Force Browsing<br />
   -pe         Perform Enumeration via Picker Service<br />
-  -u          Perform Brute-Force User ID Search<br /></code>
+  -u          Perform Brute-Force User ID Search<br /></p></code>
 
 ###Features:###
 * Service Discovery
