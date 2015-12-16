@@ -6,19 +6,19 @@ Install Dependencies:
 <code>pip install -r requirements.txt</code><br />
 Run:
 <code>python sharepwn.py</code>
-<br /><br />
-OR <br />
+<br />
+-or-<br />
 Call specific functionality from the command-line:<br />
-<code>usage: sharepwn.py [-h] [-t T] [-p P] [-v] [-b] [-pe] [-u]<br />
+usage: sharepwn.py [-h] [-t T] [-p P] [-v] [-b] [-pe] [-u]<br />
 <br />
 optional arguments:<br />
-&nbsp;&nbsp;-h,&nbsp;--help&nbsp;&nbsp;show this help message and exit<br>
+&nbsp;&nbsp;-h,&nbsp;--help&nbsp;&nbsp;show this help message and exit<br />
 &nbsp;&nbsp;-t&nbsp;T&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL of the target SP site<br />
 &nbsp;&nbsp;-p&nbsp;P&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Port/Protocol to target (80 or 443)<br />
 &nbsp;&nbsp;-v&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Version Detection<br />
 &nbsp;&nbsp;-b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Brute-Force Browsing<br />
 &nbsp;&nbsp;-pe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Enumeration via Picker Service<br />
-&nbsp;&nbsp;-u&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Brute-Force User ID Search<br /></code>
+&nbsp;&nbsp;-u&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Brute-Force User ID Search<br />
 
 ###Features:###
 * Service Discovery
