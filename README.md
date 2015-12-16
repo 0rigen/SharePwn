@@ -12,13 +12,13 @@ Call specific functionality from the command-line:<br />
 <code>usage: sharepwn.py [-h] [-t T] [-p P] [-v] [-b] [-pe] [-u]<br />
 <br /><p>
 optional arguments:<br />
-  -h, --help  show this help message and exit<br />
-  -t T        URL of the target SP site<br />
-  -p P        Port/Protocol to target (80 or 443)<br />
-  -v          Perform Version Detection<br />
-  -b          Perform Brute-Force Browsing<br />
-  -pe         Perform Enumeration via Picker Service<br />
-  -u          Perform Brute-Force User ID Search<br /></p></code>
+&nbsp;&nbsp;-h,&nbsp;--help&nbsp;&nbsp;show this help message and exit<br />
+&nbsp;&nbsp;-t&nbsp;T&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL of the target SP site<br />
+&nbsp;&nbsp;-p&nbsp;P&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Port/Protocol to target (80 or 443)<br />
+&nbsp;&nbsp;-v&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Version Detection<br />
+&nbsp;&nbsp;-b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Brute-Force Browsing<br />
+&nbsp;&nbsp;-pe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Enumeration via Picker Service<br />
+&nbsp;&nbsp;-u&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perform Brute-Force User ID Search<br /></p></code>
 
 ###Features:###
 * Service Discovery

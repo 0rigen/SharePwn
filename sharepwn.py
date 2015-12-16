@@ -222,7 +222,7 @@ try:
     parser.add_argument("-p", type=str, help="Port/Protocol to target (80 or 443)")
     parser.add_argument("-v", help="Perform Version Detection", action='store_true')
     parser.add_argument("-b", help="Perform Brute-Force Browsing", action='store_true')
-    parser.add_argument("-pe", help="Perform Enumeration via Picker Service", action='store_true')
+    parser.add_argument("-pe", help="Perform Enumeration via People Service", action='store_true')
     parser.add_argument("-u", help="Perform Brute-Force User ID Search", action='store_true')
     # TODO: Add command line argument to set the debug level
     # TODO: Handle file output throughout program (probably should be a final clean-up item)
