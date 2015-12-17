@@ -17,16 +17,17 @@ endc = "\033[0m"
 bold = "\033[1m"
 underline = "\033[4m"
 
-# TODO Try and spoof request as if it were coming from the local machine
-# host resolution, then spoof in packet?
+# TODO: Add handling of SOAP 1.2 message if 1.1 is rejected
 
+# Headers, if needed, though requests handles this pretty well
 people_headers = """POST /_vti_bin/People.asmx HTTP/{{http}}
 Host: {{Target}}
 Content-Type: text/xml; charset=utf-8
 Content-Length: {{length}}
 SOAPAction: "http://schemas.microsoft.com/sharepoint/soap/SearchPrincipals"
 """
-people_data = """<?xml version="1.0" encoding="utf-8"?>
+# SOAP 1.1 payload format
+people_data11 = """<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <SearchPrincipals xmlns="http://schemas.microsoft.com/sharepoint/soap/">
@@ -37,6 +38,22 @@ people_data = """<?xml version="1.0" encoding="utf-8"?>
    </soap:Body>
 </soap:Envelope>
 """
+
+# SOAP 1.2 payload format
+people_data12 = """<?xml version="1.0" encoding="utf-8"?>
+<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+  <soap12:Body>
+    <ResolvePrincipals xmlns="http://schemas.microsoft.com/sharepoint/soap/">
+      <principalKeys>
+        <string>{{searchString}}</string>
+        <string>{{maxResults}}</string>
+      </principalKeys>
+      <principalType>{{principalType}}</principalType>
+      <addToUserInfoList>False</addToUserInfoList>
+    </ResolvePrincipals>
+  </soap12:Body>
+</soap12:Envelope>"""
+
 request_set = ['$', 'SYSTEM', 'AUTHORITY', 'admin', 'Administrator', 'administrator', 'Admin', '\\']
 
 
@@ -189,8 +206,8 @@ def people_search(target, numres, type):
                 r11 = requests.post(target, data=payload)  # Send a request with new searchString
                 logging.info("Request sent to People.aspx with searchString %s" % c)
 
-                ## *** PARSE RESULTS *** ## INCOMPLETE
-                print(green + "\n[*] " + endc + "This is where the results go for %s\n" % c + endc)
+                ## *** PARSE RESULTS *** ##
+                print(green + "\n[*] " + endc + "User accounts discovered for %s:\n" % c + endc)
                 soup = BS(r11.content)
                 print soup.find('AccountName').text
 
@@ -221,8 +238,10 @@ def people_search(target, numres, type):
             r11 = requests.post(destination, data=payload)  # Send a request with new searchString
             logging.info("Request sent to People.aspx with searchString %s" % s)
 
-            # TODO: Regex to filter through returned results and print them here
-            print(green + "[*] " + endc + "This is where the results go for %s" % s + endc)
+            ## *** PARSE RESULTS *** ##
+            print(green + "\n[*] " + endc + "User accounts discovered for %s:\n" % s + endc)
+            soup = BS(r11.content)
+            print soup.find('AccountName').text
 
         except requests.HTTPError:
             logging.error("Got an HTTP error on an already validated People.aspx")
