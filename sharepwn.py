@@ -68,22 +68,54 @@ def check(target):
         return None
 
 
-####################################################
-# The target is a couplet of URL and port number,  #
-#       like [yahoo.com, 443]                      #
-# return array tarout[]                            #
-####################################################
-def changetarget():
+#############################################################
+# The target is a couplet of URL and port number,           #
+#       like [yahoo.com, 443]                               #
+# @full - boolean specifying a full change - this is        #
+# necessary to handle the various command line combinations #
+# as well as a full change during runtime                   #
+# return array tarout[]                                     #
+#############################################################
+def changetarget(full):
+    # If the full flag is True, just erase the existing Target[] for simplicity
+    if full:
+        target[0] = None
+        target[1] = None
+
+    # Do the changes
     while True:
+
         tarout = ["", ""]
         t = raw_input(cyan + "[?] Please enter a target URL now: " + endc)
         tarout[0] = t
         target[0] = t  # Put on global var...cause I gotta
-        tarout[1] = changeport()  # Call changeport() to get a new port #
+
+        # First run: No port set, and full = False
+        if full is not True and target[1] is None:
+            tarout[1] = changeport()
+
+        # Runtime change: Full is true and port has been cleared
+        elif full is True and target[1] is None:
+            tarout[1] = changeport()  # Call changeport() for runtime change
+
+        # If we were just here to get a url, but the port was specified...
+        elif full is not True and target[1] is not None:
+            tarout[1] = target[1]
+
+        # Catch any other weird stuf...
+        else:
+            print("Encountered a weird changetarget() case, but handling it alright...go check that out...")
+            tarout[1] = changeport()
+
+        # Assign that new port to the global variable
+        target[1] = tarout[1]
+
         tarout[0] = url_processor.checkhttp(t, tarout[1])  # Process the target string
+
         if check(tarout) is not None:
             # With the new port, go ahead and correct the target specification for the protocol
             return tarout
+
         else:
             continue
 
@@ -195,7 +227,7 @@ def showmenu(tar):
         elif choice.capitalize() == 'U':
             useridenumeration(tar)
         elif choice.capitalize() == 'T':
-            tar = changetarget()
+            tar = changetarget(True)
         # elif choice.capitalize() == 'O':
         #    print("\nNot yet implemented\n")
         elif choice.capitalize() == 'Q':
@@ -238,18 +270,33 @@ try:
     # Right now, if the target is blank, then both must be set manually, eliminating (2)
     #####################################################################################
 
-    # If the user was nice and provided both target and port #...
+    # A Target was provided
     if args.t is not None:
+        # A port was also provided
         if args.p is not None:
-            target[0] = args.t
+            target[0] = args.t  # Assign values
             target[1] = int(args.p)
-            target[0] = url_processor.checkhttp(target[0], target[1])
-            # If the user provided a target but no port
-        elif args.p and args.port is None:
-            target[1] = changeport()
-    # Else, no target was specified, and we handle (1) and (2) as a single case
+            target[0] = url_processor.checkhttp(target[0], target[1])  # check URL
+
+        # If the user provided a target but no port
+        elif args.p is None:
+            target[0] = args.t  # take the target
+            target[1] = changeport()  # get the port
+
+    # No Target was provided...
+    elif args.t is None:
+        # A port was provided, but no target
+        if args.p is not None:
+            target[1] = int(args.p)  # take the port
+            target = changetarget(False)  # get the target
+
+        # Nothing was provided...
+        elif args.p is None:
+            target = changetarget(True)
+
+    # error case... should never go this route
     else:
-        target = changetarget()
+        print("This case should never have been reached... 0x01")
 
     #####################################################################
     # Handle command-line functionality specification.                  #
