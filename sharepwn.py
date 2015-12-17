@@ -47,7 +47,7 @@ def banner():
       ___   _                         ___
      / __| | |_    __ _   _ _   ___  | _ \ __ __ __  _ _
      \__ \ | ' \  / _` | | '_| / -_) |  _/ \ V  V / | ' \\
-     |___/ |_||_| \__,_| |_|   \___| |_|    \_/\_/  |_||_|  V.01
+     |___/ |_||_| \__,_| |_|   \___| |_|    \_/\_/  |_||_|  V.1 BETA
 
     SharePoint Security Auditing by @_0rigen / 0rigen.net""" + endc)
 
@@ -102,9 +102,8 @@ def changetarget(full):
         elif full is not True and target[1] is not None:
             tarout[1] = target[1]
 
-        # Catch any other weird stuf...
+        # If we get here, likely the user failed to specify a valid URL the first time and we're rewriting target[]
         else:
-            print("Encountered a weird changetarget() case, but handling it alright...go check that out...")
             tarout[1] = changeport()
 
         # Assign that new port to the global variable
@@ -117,13 +116,15 @@ def changetarget(full):
             return tarout
 
         else:
+            # Loop again, but set full to True, b/c we need to overwrite what was previously specified.
+            full = True
             continue
 
 
 # Just a little port changing stub to return
 # a numeric port value
 ##########################################################
-# changeport() requests and validates a user-defind port #
+# changeport() requests and validates a user-defined port #
 # @port - the numeric port value                         #
 ##########################################################
 def changeport():
@@ -136,8 +137,13 @@ def changeport():
         except:
             print(yellow + "[!] Bad Port.  Try again." + endc)
 
-    # With the new port, go ahead and correct the target specification for the protocol
-    target[0] = url_processor.checkhttp(target[0], port)
+    # Check for a standard port number
+    var = url_processor.checkhttp(target[0], port)
+    if var is not None:
+        target[1] = var
+    # If a non standard port was identified, call self
+    else:
+        port = changeport()
 
     return port
 
@@ -242,7 +248,7 @@ def showmenu(tar):
 # ************************************
 try:
     # Runtime target holder
-    target = ["", ""]
+    target = [None, None]
 
     # Welcome to SharePwn
     banner()
@@ -280,19 +286,19 @@ try:
 
         # If the user provided a target but no port
         elif args.p is None:
-            target[0] = args.t  # take the target
-            target[1] = changeport()  # get the port
+            print(red + "[!]" + " Target specified on command line, but no port!  Use -p to specify the port!")
+            sys.exit(0)
 
     # No Target was provided...
     elif args.t is None:
         # A port was provided, but no target
         if args.p is not None:
-            target[1] = int(args.p)  # take the port
-            target = changetarget(False)  # get the target
+            print(red + "[!]" + " Port specified on command line, but no target!  Use -t to specify the target!")
+            sys.exit(0)
 
         # Nothing was provided...
         elif args.p is None:
-            target = changetarget(True)
+            target = changetarget(False)
 
     # error case... should never go this route
     else:
