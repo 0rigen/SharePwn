@@ -65,4 +65,5 @@ def checkhttp(url, port):
             return theurl
     else:
         print (cyan + "[!] Non-standard ports not yet supported!" + endc)
+        return None  # Indicate that a bad port was used
         # TODO: Handle non-standard port specifications
