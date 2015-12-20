@@ -21,6 +21,9 @@ successes = []
 failures = []
 
 
+# TODO: Accept cookie or ntlm arguments and use them if provided
+
+
 ###############################################
 #                    geturlcode               #
 # @link - a single url                        #

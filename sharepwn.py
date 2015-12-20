@@ -3,9 +3,10 @@ import logging
 import os
 import sys
 
+import requests
+
 import brute_browse
 import people_enum
-import requests
 import url_processor
 import user_id
 import version_id
@@ -16,6 +17,8 @@ __status__ = "Development"
 
 # Let's suppress unverified HTTPS warnings...
 requests.packages.urllib3.disable_warnings()
+# Global authentication status
+auth_stat = None
 
 # Colors for terminal output
 red = "\033[31m"  # usually for errors, [X] items
@@ -211,13 +214,24 @@ def useridenumeration(target):
 ###################################
 def showmenu(tar):
     while True:
+
+        # Print authentication status based on auth_stat
         print(endc + blue + "\n[*] Targeting: %s:%s [*]" % (tar[0], tar[1]) + endc)
+        if auth_stat is None:
+            print(blue + "[*] No authentication configured; you're an outsider" + endc)
+        elif auth_stat is 'cookie':
+            print(blue + "[*] Utilizing Cookie-based Authentication" + endc)
+        elif auth_stat is 'ntlm':
+            print(blue + "[*] Utilizing NTLM authentication" + endc)
+
+        # Print options
         print(cyan + "Please choose an option below: \n")
         print("[" + yellow + "V" + endc + cyan + "]ersion Identification")
         print("[" + yellow + "B" + endc + cyan + "]rute Force Browsing")
         # print("[" + yellow + "S" + endc + cyan + "]ervice Access Testing")
         print("[" + yellow + "P" + endc + cyan + "]eople Service Enumeration")
         print("[" + yellow + "U" + endc + cyan + "]serID Brute Force Search")
+        print("[" + yellow + "A" + endc + cyan + "]uthentication Configuration")
         print("[" + yellow + "T" + endc + cyan + "]arget (Change your target URL/Protocol)")
         # print("[" + yellow + "O" + endc + cyan + "]utput Redirection (Print to a file)")
         print("[" + yellow + "Q" + endc + cyan + "]uit and go home")
@@ -232,6 +246,8 @@ def showmenu(tar):
             peopleenumeration(tar)
         elif choice.capitalize() == 'U':
             useridenumeration(tar)
+        elif choice.capitalize() == 'A':
+            print ("User Authentication stuff...")
         elif choice.capitalize() == 'T':
             tar = changetarget(True)
         # elif choice.capitalize() == 'O':
