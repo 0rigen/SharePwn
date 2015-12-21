@@ -18,6 +18,7 @@ bold = "\033[1m"
 underline = "\033[4m"
 
 # TODO: Add handling of SOAP 1.2 message if 1.1 is rejected
+# TODO: Accept cookie or ntlm arguments and use them if provided
 
 # Headers, if needed, though requests handles this pretty well
 people_headers = """POST /_vti_bin/People.asmx HTTP/{{http}}
@@ -102,7 +103,7 @@ def locate(target):
 
     # If we get this far, we couldn't find People.asmx
     print(yellow + "[!]" + endc + "Failed to locate the People.asmx service in common locations.")
-    con = raw_input(yelow + "[?]" + endc + "Specify the location manually? (Y/N): ")
+    con = raw_input(yellow + "[?]" + endc + "Specify the location manually? (Y/N): ")
     if con.capitalize() == "Y":
         loc = raw_input(cyan + "[?]" + endc + "URL of People.asmx [Format: http://domain.com/People.asmx]:")
         return loc
@@ -115,7 +116,7 @@ def locate(target):
 # @target - the target site
 # destination - returns full url of the found service
 ###########################################################
-def find_service(target):
+def find_service(target, cookies=None):
     url = target[0]
     fakeagent = "'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'"
     # port = target[1] # Unused
@@ -125,7 +126,7 @@ def find_service(target):
     # Set XML Values for dummy request
     # TODO Move this into a create_payload() function
     header = create_header(target, destination, fakeagent, "1.1")
-    payload = people_data.replace("{{searchString}}", "a")
+    payload = people_data11.replace("{{searchString}}", "a")
     payload = payload.replace("{{maxResults}}", "100")
     payload = payload.replace("{{principalType}}", "All")
 
@@ -159,7 +160,7 @@ def find_service(target):
 
         # Bad Request - something weird happened...
         elif str(req.status_code).startswith("400"):
-            print(red + "[!]" + endc + " Received HTTP 400 Response: Bad Request.  hmmm...")
+            print(red + "\n[!]" + endc + " Received HTTP 400 Response: Bad Request.  hmmm...")
 
         # All else
         else:
@@ -197,7 +198,7 @@ def people_search(target, numres, type):
         for c in ascii_lowercase:
 
             # Build the request body
-            data = people_data.replace("{{maxResults}}", str(numresults))  # Set max results value
+            data = people_data11.replace("{{maxResults}}", str(numresults))  # Set max results value
             data = data.replace("{{principalType}}", restype)  # Set principalType value
             data = data.replace("{{searchString}}", c)  # Set searchString to single character
             payload = data
@@ -208,8 +209,8 @@ def people_search(target, numres, type):
 
                 ## *** PARSE RESULTS *** ##
                 print(green + "\n[*] " + endc + "User accounts discovered for %s:\n" % c + endc)
-                soup = BS(r11.content)
-                print soup.find('AccountName').text
+                '''soup = Beau(r11.content)
+                print soup.find('AccountName').text'''
 
             except requests.HTTPError:
                 logging.error(
@@ -229,19 +230,19 @@ def people_search(target, numres, type):
     for s in request_set:
 
         # Build the request body
-        data = people_data.replace("{{maxResults}}", str(numresults))  # Set max results value
+        data = people_data11.replace("{{maxResults}}", str(numresults))  # Set max results value
         data = data.replace("{{principalType}}", restype)  # Set principalType value
         data = data.replace("{{searchString}}", s)  # Set searchString to single character
         payload = data
 
         try:
-            r11 = requests.post(destination, data=payload)  # Send a request with new searchString
+            r11 = requests.post(target, data=payload)  # Send a request with new searchString
             logging.info("Request sent to People.aspx with searchString %s" % s)
 
             ## *** PARSE RESULTS *** ##
             print(green + "\n[*] " + endc + "User accounts discovered for %s:\n" % s + endc)
-            soup = BS(r11.content)
-            print soup.find('AccountName').text
+            '''soup = BS(r11.content)
+            print soup.find('AccountName').text'''
 
         except requests.HTTPError:
             logging.error("Got an HTTP error on an already validated People.aspx")

@@ -3,6 +3,7 @@ import re
 import sys
 
 import requests
+
 import url_processor
 
 __author__ = '0rigen'
@@ -10,6 +11,7 @@ __email__ = "0rigen@0rigen.net"
 __status__ = "Development"
 
 # TODO: Parse returned UserID page for valid data
+# TODO: Accept cookie or ntlm arguments and use them if provided
 
 red = "\033[31m"  # usually for errors, [X] items
 cyan = "\033[36m"
