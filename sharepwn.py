@@ -47,9 +47,32 @@ def banner():
       ___   _                         ___
      / __| | |_    __ _   _ _   ___  | _ \ __ __ __  _ _
      \__ \ | ' \  / _` | | '_| / -_) |  _/ \ V  V / | ' \\
-     |___/ |_||_| \__,_| |_|   \___| |_|    \_/\_/  |_||_|  V.1 BETA
+     |___/ |_||_| \__,_| |_|   \___| |_|    \_/\_/  |_||_|  BETA
 
     SharePoint Security Auditing by @_0rigen / 0rigen.net""" + endc)
+
+
+###################################################
+# Configures either NTLM or Cookie authentication #
+# ntlm - return a couple of username:password     #
+# cookie - return a ful path of the cookie file?? #
+###################################################
+def authentication_config():
+    type = str(raw_input(
+            yellow + "[!]" + endc + " Use " + green + "(N)" + endc + "TLM or " + blue + "(C)" + endc + "ookie authentication?"))
+    if type.capitalize().startswith("N"):
+        username = raw_input(blue + "Username: " + endc)
+        password = raw_input(blue + "Password: " + endc)
+        print(yellow + "[*]" + endc + " Using credentials " + green + "%s:%s" + endc) % (str(username), str(password))
+        ntlm = [username, password]
+        return ntlm
+
+    elif type.capitalize().startswith("C"):
+        # TODO I really should proceed to READ the cookie and save it somewhere rather than returning the path...
+        cookie_file = raw_input(blue + "Full Path to Cookie File: " + endc)
+        print(yellow + "[*]" + endc + " Loading cookie from %s" % str(cookie_file))
+        cookie = str(cookie_file)
+        return cookie
 
 
 ##################################################
@@ -205,19 +228,32 @@ def useridenumeration(target):
         print(yellow + "[*] No users were found :(" + endc)
 
 
+def showtarget(tar, auth):
+    print(endc + blue + "\n[*] Targeting: %s:%s [*]" % (tar[0], tar[1]) + endc)
+    if auth is None:
+        print(endc + blue + "[*] Testing as an Unauthenticated user" + endc)
+    elif type(auth) is str:
+        print(endc + blue + "[*] Using Cookie Saved At: %s [*]" % auth + endc)
+    elif type(auth) is list:
+        print(endc + blue + "[*] Authenticating as " + green + "%s:%s" + endc) % (str(auth[0]), str(auth[1]))
+
+
+
 ###################################
 # Show the menu                   #
 # @tar - the target, port couplet #
 ###################################
 def showmenu(tar):
+    auth_type = None
     while True:
-        print(endc + blue + "\n[*] Targeting: %s:%s [*]" % (tar[0], tar[1]) + endc)
+        showtarget(tar, auth_type)
         print(cyan + "Please choose an option below: \n")
         print("[" + yellow + "V" + endc + cyan + "]ersion Identification")
         print("[" + yellow + "B" + endc + cyan + "]rute Force Browsing")
         # print("[" + yellow + "S" + endc + cyan + "]ervice Access Testing")
         print("[" + yellow + "P" + endc + cyan + "]eople Service Enumeration")
         print("[" + yellow + "U" + endc + cyan + "]serID Brute Force Search")
+        print("[" + yellow + "A" + endc + cyan + "]uthentication Configuration")
         print("[" + yellow + "T" + endc + cyan + "]arget (Change your target URL/Protocol)")
         # print("[" + yellow + "O" + endc + cyan + "]utput Redirection (Print to a file)")
         print("[" + yellow + "Q" + endc + cyan + "]uit and go home")
@@ -232,6 +268,8 @@ def showmenu(tar):
             peopleenumeration(tar)
         elif choice.capitalize() == 'U':
             useridenumeration(tar)
+        elif choice.capitalize() == 'A':
+            auth_type = authentication_config()
         elif choice.capitalize() == 'T':
             tar = changetarget(True)
         # elif choice.capitalize() == 'O':
@@ -249,6 +287,8 @@ def showmenu(tar):
 try:
     # Runtime target holder
     target = [None, None]
+    par_cookie = None
+    par_credentials = None
 
     # Welcome to SharePwn
     banner()
