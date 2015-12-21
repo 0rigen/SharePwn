@@ -1,7 +1,12 @@
 import logging
-import sys
+
+logging.basicConfig(level=logging.CRITICAL)
+# logging.getLogger('suds.client').setLevel(logging.CRITICAL)
+# logging.getLogger('suds.transport').setLevel(logging.DEBUG)
+
 from string import ascii_lowercase
-# TODO Use BeautifulSoup to parse the XML responses from asmx service
+from suds.client import Client
+
 import requests
 
 __author__ = '0rigen'
@@ -17,64 +22,7 @@ endc = "\033[0m"
 bold = "\033[1m"
 underline = "\033[4m"
 
-# TODO: Add handling of SOAP 1.2 message if 1.1 is rejected
-# TODO: Accept cookie or ntlm arguments and use them if provided
-
-# Headers, if needed, though requests handles this pretty well
-people_headers = """POST /_vti_bin/People.asmx HTTP/{{http}}
-Host: {{Target}}
-Content-Type: text/xml; charset=utf-8
-Content-Length: {{length}}
-SOAPAction: "http://schemas.microsoft.com/sharepoint/soap/SearchPrincipals"
-"""
-# SOAP 1.1 payload format
-people_data11 = """<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-    <soap:Body>
-        <SearchPrincipals xmlns="http://schemas.microsoft.com/sharepoint/soap/">
-            <searchText>{{searchString}}</searchText>
-            <maxResults>{{maxResults}}</maxResults>
-            <principalType>{{principalType}}</principalType>
-        </SearchPrincipals>
-   </soap:Body>
-</soap:Envelope>
-"""
-
-# SOAP 1.2 payload format
-people_data12 = """<?xml version="1.0" encoding="utf-8"?>
-<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-  <soap12:Body>
-    <ResolvePrincipals xmlns="http://schemas.microsoft.com/sharepoint/soap/">
-      <principalKeys>
-        <string>{{searchString}}</string>
-        <string>{{maxResults}}</string>
-      </principalKeys>
-      <principalType>{{principalType}}</principalType>
-      <addToUserInfoList>False</addToUserInfoList>
-    </ResolvePrincipals>
-  </soap12:Body>
-</soap12:Envelope>"""
-
 request_set = ['$', 'SYSTEM', 'AUTHORITY', 'admin', 'Administrator', 'administrator', 'Admin', '\\']
-
-
-######################################################################
-# create_header creates a custom header for each unique request      #
-# @target -  the target domain like sp.domain.com                    #
-# @location - the People.asmx location, like /_vti_bin/People.asmx   #
-# @ http - the HTTP version to use; defaults to 1.1 if not provided  #
-# ret_header - the custom header to be returned                      #
-######################################################################
-def create_header(target, location, agent=None, http=None):
-    # Default to HTTP/1.1
-    if http is None:
-        http = "1.1"
-    # Fill in the blanks...
-    # ret_header = people_headers.replace("{{location}}", location)
-    ret_header = people_headers.replace("{{Target}}", target[0])
-    ret_header = ret_header.replace("{{http}}", http)
-    ret_header = ret_header.replace("{{length}}", "1")
-    return ret_header
 
 
 ###########################################################
@@ -82,7 +30,6 @@ def create_header(target, location, agent=None, http=None):
 # @target - the url.port couplet of the target            #
 # loc - returns the location where People.asmx was found  #
 ###########################################################
-# TODO Need to change how I do this.  The /_vti_bin/People.asmx is constant
 def locate(target):
     # Potential locations
     locations = ['/', '/Search', '/sites/us/en']
@@ -96,14 +43,20 @@ def locate(target):
         r = requests.get(loc)
         if str(r.status_code).startswith("200"):
             print(yellow + "[*] " + endc + "Located People.asmx at: %s" % loc)
-            return loc
-        # i+=1
+            # Now check for the WSDL; this should always be successful
+            loc = loc + "?WSDL"
+            q = requests.get(loc)
+            if str(q.status_code).startswith("200"):
+                print(yellow + "[*]" + endc + " Located People WSDL at: %s" % loc)
+                return loc  # Returns format: "http://www.site.com/_vti_bin/Service.asmx?WSDL"
+            else:
+                print(red + "[!]" + endc + "Problem locating the WSDL...this shouldn't have happened")
         else:
             continue
 
     # If we get this far, we couldn't find People.asmx
     print(yellow + "[!]" + endc + "Failed to locate the People.asmx service in common locations.")
-    con = raw_input(yellow + "[?]" + endc + "Specify the location manually? (Y/N): ")
+    con = raw_input(yelow + "[?]" + endc + "Specify the location manually? (Y/N): ")
     if con.capitalize() == "Y":
         loc = raw_input(cyan + "[?]" + endc + "URL of People.asmx [Format: http://domain.com/People.asmx]:")
         return loc
@@ -111,66 +64,18 @@ def locate(target):
         return None
 
 
-###########################################################
-# find_service - determine if People.asmx is accessible
-# @target - the target site
-# destination - returns full url of the found service
-###########################################################
-def find_service(target, cookies=None):
-    url = target[0]
-    fakeagent = "'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'"
-    # port = target[1] # Unused
-
-    destination = locate(target)
-
-    # Set XML Values for dummy request
-    # TODO Move this into a create_payload() function
-    header = create_header(target, destination, fakeagent, "1.1")
-    payload = people_data11.replace("{{searchString}}", "a")
-    payload = payload.replace("{{maxResults}}", "100")
-    payload = payload.replace("{{principalType}}", "All")
-
-    logging.info("\nBuilding People.asmx dummy POST Request\n")
-
-    # Build dummy Packet and test responsiveness
-    # payload = data
-
-    sys.stdout.write(yellow + "\n[*] " + endc + "Sending test request to %s\n" % destination + endc)
+#############################################
+# test_search() does an initial check for   #
+# accessibility of the service              #
+# @target - the url to try against          #
+#############################################
+def test_search(target):
+    print (yellow + "[*]" + endc + " Performing service test...")
     try:
-        # TODO Move this stuff into a test connection type of method
-        # I have to manually specify the content-type, or requests will use the wrong format and the request returns 415 code
-        req = requests.post(destination, data=payload, allow_redirects=True,
-                            headers={"Content-Type": "text/xml; charset=utf-8"})
-
-        logging.info("Dummy request sent to People.aspx")
-
-        # Request seemed to work
-        if str(req.status_code).startswith("2"):
-            print(
-                green + "\n[*] " + endc + "Received Status %s.  People search is available and not locked down!\n" % str(
-                        req.status_code) + endc)
-            logging.info("Received a 2XX Status for People.aspx")
-            return destination
-
-        # Service is locked down
-        elif str(req.status_code).startswith("403") or str(req.status_code).startswith("401"):
-            print(
-                yellow + "\n[!] " + endc + "Received Status %s.  You do not have permission to use the service. \n" % req.status_code + endc)
-            return None
-
-        # Bad Request - something weird happened...
-        elif str(req.status_code).startswith("400"):
-            print(red + "\n[!]" + endc + " Received HTTP 400 Response: Bad Request.  hmmm...")
-
-        # All else
-        else:
-            print(yellow + "\n[!] " + endc + "Received Unexpected Status %s" % str(req.status_code) + endc)
-            return None
-
-    except requests.HTTPError:
-        print(red + "\n[X] " + endc + "Error Received.  People.asmx Service is locked down or not there.\n" + endc)
+        req = client.service['PeopleSoap'].SearchPrincipals("a", 5, "All")
+        return True
     except:
-        print(red + "\n[!] " + endc + "Unknown error during People enumeration\n" + endc)
+        return False
 
 
 ###################################################################
@@ -181,68 +86,82 @@ def find_service(target, cookies=None):
 # @results - the number of results to request
 # @rtype - the type of data to request, usually All.
 ###################################################################
-def people_search(target, numres, type):
+def people_search(target, numres, type, specific_string=None, creds=None, cookie=None):
     # Verify input types
     try:
+
+        # Process creds, if any
+        if creds is not None:
+            print("NTLM Creds not yet supported...ugh >.<")
+            # creds = WindowsHttpAuthenticated(username=str(creds[0]), password=str(creds[1]))
+            ## Create suds stuff
+            # url = target
+            # client = Client(url, transport=ntlm)
+        elif creds is None:
+            url = target
+            client = Client(url)
+
+        # Confirm proper input types
         numresults = int(numres)
         restype = str(type)
+        search_text = str(specific_string)
+
     except:
-        print(red + "[X] " + endc + "Invalid parameter sent to People.asmx searcher" + endc)
+        print(red + "\n[X] " + endc + "Invalid parameter sent to People.asmx searcher" + endc)
         return 1
 
-    # alphabetic search
-    print(green + "\n[*] " + endc + "Beginning alphabetic People search.\n")
+    # Check to see if the service is accessible...
+    if test_search(url) is False:
+        print (red + "[!]" + endc + " Error encountered.  You're going to need credentials.")
+        return 1
 
-    # Perform text enumeration via <searchText> parameter
-    try:
-        for c in ascii_lowercase:
-
-            # Build the request body
-            data = people_data11.replace("{{maxResults}}", str(numresults))  # Set max results value
-            data = data.replace("{{principalType}}", restype)  # Set principalType value
-            data = data.replace("{{searchString}}", c)  # Set searchString to single character
-            payload = data
-
-            try:
-                r11 = requests.post(target, data=payload)  # Send a request with new searchString
-                logging.info("Request sent to People.aspx with searchString %s" % c)
-
-                ## *** PARSE RESULTS *** ##
-                print(green + "\n[*] " + endc + "User accounts discovered for %s:\n" % c + endc)
-                '''soup = Beau(r11.content)
-                print soup.find('AccountName').text'''
-
-            except requests.HTTPError:
-                logging.error(
-                        red + "[!] " + endc + "Got an HTTP error on an already validated People.aspx..That's bad!" + endc)
-            except:
-                print(red + "\n[!] " + endc + "Error returned for searchString %s\n" % c + endc)
-
-    except KeyboardInterrupt:
-        print(yellow + "[!] " + endc + "Search Interrupted by YOU!\n")
-    except:
-        print(red + "[!] " + endc + "Unknown error occurred during search\n")
-
-    # Special accounts search
-    print(green + "\n[*] " + endc + "Beginning special accounts search.\n")
-
-    # Begin making requests for specialized accounts
-    for s in request_set:
-
-        # Build the request body
-        data = people_data11.replace("{{maxResults}}", str(numresults))  # Set max results value
-        data = data.replace("{{principalType}}", restype)  # Set principalType value
-        data = data.replace("{{searchString}}", s)  # Set searchString to single character
-        payload = data
-
+    # If specific_string is not None, do a single search using that string
+    if specific_string is not None:
+        print (yellow + "[*]" + endc + " Performing search for '%s'" % search_text)
         try:
-            r11 = requests.post(target, data=payload)  # Send a request with new searchString
-            logging.info("Request sent to People.aspx with searchString %s" % s)
+            req = client.service['PeopleSoap'].SearchPrincipals(search_text, numresults, restype)
+            print req
+        except:
+            print (red + "[!]" + endc + " Error encountered during text search")
 
-            ## *** PARSE RESULTS *** ##
-            print(green + "\n[*] " + endc + "User accounts discovered for %s:\n" % s + endc)
-            '''soup = BS(r11.content)
-            print soup.find('AccountName').text'''
+    # Otherwise, continue with automatic search...
+    # alphabetic search
+    else:
+        print(green + "\n[*] " + endc + "Beginning alphabetic People search.\n")
+
+        # Perform text enumeration via <searchText> parameter
+        try:
+            for c in ascii_lowercase:
+
+                print (yellow + "[*]" + endc + " Performing search for '%s'" % str(c))
+                try:
+                    req = client.service['PeopleSoap'].SearchPrincipals(c, numresults, restype)
+                    print req
+                    # TODO Cleanly parse through successful alpha results and make the printout look nice
+                except:
+                    print (red + "[!]" + endc + " Error encountered during character search")
+                    break
+
+        except KeyboardInterrupt:
+            print(yellow + "[!] " + endc + "Search Interrupted by YOU!\n")
+        except:
+            print(red + "[!] " + endc + "Unknown error occurred during search\n")
+
+        # Special accounts search
+        print(green + "\n[*] " + endc + "Beginning special accounts search.\n")
+
+        # Begin making requests for specialized accounts
+        try:
+            for s in request_set:
+
+                print (yellow + "[*]" + endc + " Performing search for '%s'" % str(s))
+                try:
+                    req = client.service['PeopleSoap'].SearchPrincipals(s, numresults, restype)
+                    print req
+                    # TODO Cleanly parse through successful special results and make the printout look nice
+                except:
+                    print (red + "[!]" + endc + " Error encountered during special search")
+                    break
 
         except requests.HTTPError:
             logging.error("Got an HTTP error on an already validated People.aspx")
@@ -253,6 +172,6 @@ def people_search(target, numres, type):
 
 # Execution Section
 def search(target):
-    dst = find_service(target)
+    dst = locate(target)
     if dst is not None:
-        people_search(dst, 1000, "All")
+        people_search(dst, 10, "All")
