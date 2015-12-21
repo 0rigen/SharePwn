@@ -112,7 +112,7 @@ def people_search(target, numres, type, specific_string=None, creds=None, cookie
 
     # Check to see if the service is accessible...
     if test_search(url) is False:
-        print (red + "[!]" + endc + " Error encountered.  You're going to need credentials.")
+        print (red + "[!]" + endc + " Error encountered.  Your current credentials aren't sufficient.")
         return 1
 
     # If specific_string is not None, do a single search using that string
