@@ -25,17 +25,15 @@ optional arguments:<br />
 * Version Identification
 * User Enumeration
 * System/Machine Account Discovery
+* NTLM Authentication
 
 ### Known Issues: ###
-* People Enumeration is not fully functional, as I need to stand up a testing environment in order to finish
+* People Enumeration is not fully functional, primarily in success cases, as I need to stand up a testing environment in order to finish
 some of the details.
 
 ### Short Term Development TO-DO items: ###
-* Support NTLM and Cookie-based Authentication
-* Finish People Enumeration Functionality
-* Better error handling
-* Code Clean-up
-
+* Finish People Enumeration Success Parsing
+* Finish support for Cookie-based Authentication
 
 ### Contributing: ###
 Although I've written and released the initial development version of this tool myself, I am eager
