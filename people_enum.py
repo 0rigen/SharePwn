@@ -183,6 +183,12 @@ def cookie_search(target, cookie):
         people_search(dst, 10, "All", None, cookie)
 
 
+def anon_search(target):
+    dst = locate(target)
+    if dst is not None:
+        people_search(dst, 10, "All")
+
+
 '''
 tar = ["http://sharepoint.malabarsoccer.com/", 80]
 creds = ["user", "pass"]

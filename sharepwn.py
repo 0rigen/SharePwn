@@ -215,6 +215,8 @@ def peopleenumeration(target, creds):
         people_enum.creds_search(target, creds)
     elif isinstance(creds, cookielib.LWPCookieJar):
         people_enum.cookie_search(target, creds)
+    elif creds is None:
+        people_enum.anon_search(target)
 
 
 #######################

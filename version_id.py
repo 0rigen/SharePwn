@@ -44,6 +44,7 @@ def identify(url, port=None):
     if str(r.status_code).startswith("4") or str(r.status_code).startswith("5"):
         print(
             yellow + "[!] Unsuccessful request when attempting to identify SP version.  Version remains Unknown..." + endc)
+        print("This sometimes indicates that you'll need valid credentials to see the SP site.")
         logging.info("Version ID failed; Got a response %s" % str(r.status_code))
         return "Unknown"
 
