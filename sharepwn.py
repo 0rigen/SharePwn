@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import pickle
 import sys
 
 import brute_browse
@@ -58,21 +59,33 @@ def banner():
 # cookie - return a ful path of the cookie file?? #
 ###################################################
 def authentication_config():
-    type = str(raw_input(
-            yellow + "[!]" + endc + " Use " + green + "(N)" + endc + "TLM or " + blue + "(C)" + endc + "ookie authentication?"))
-    if type.capitalize().startswith("N"):
-        username = raw_input(blue + "Username: " + endc)
-        password = raw_input(blue + "Password: " + endc)
-        print(yellow + "[*]" + endc + " Using credentials " + green + "%s:%s" + endc) % (str(username), str(password))
-        ntlm = [username, password]
-        return ntlm
+    while True:
+        type = str(raw_input(
+                yellow + "[!]" + endc + " Use " + green + "(N)" + endc + "TLM or " + blue + "(C)" + endc + "ookie authentication?"))
+        if type.capitalize().startswith("N"):
+            username = raw_input(blue + "Username: " + endc)
+            password = raw_input(blue + "Password: " + endc)
+            print(yellow + "[*]" + endc + " Using credentials " + green + "%s:%s" + endc) % (
+            str(username), str(password))
+            ntlm = [username, password]
+            return ntlm
 
-    elif type.capitalize().startswith("C"):
-        # TODO I really should proceed to READ the cookie and save it somewhere rather than returning the path...
-        cookie_file = raw_input(blue + "Full Path to Cookie File: " + endc)
-        print(yellow + "[*]" + endc + " Loading cookie from %s" % str(cookie_file))
-        cookie = str(cookie_file)
-        return cookie
+        elif type.capitalize().startswith("C"):
+            # TODO I still need to READ the cookie and save it somewhere rather than returning the path...
+            cookie_file = raw_input(blue + "Full Path to Cookie File: " + endc)
+            print(yellow + "[*]" + endc + " Loading cookie from %s" % str(cookie_file))
+            cookie_file = str(cookie_file)
+            try:
+                with open(cookie_file, 'wr') as c:
+                    print(" this isn't working yet...")
+                    cookie = requests.utils.cookiejar_from_dict(pickle.load(c))
+                    return cookie
+            except:
+                print(red + "[!] " + endc + "Failed to load cookie.")
+                break
+                # session = requests.session(cookies=cookies)
+                # The above line needs to go into the request location
+
 
 
 ##################################################
@@ -188,10 +201,10 @@ def version(target):
 
 
 ######################
-# Picker Enumeration #
+# People Enumeration #
 ######################
-def peopleenumeration(target):
-    people_enum.search(target)
+def peopleenumeration(target, creds):
+    people_enum.search(target, creds)
 
 
 #######################
@@ -250,7 +263,7 @@ def showmenu(tar):
         print(cyan + "Please choose an option below: \n")
         print("[" + yellow + "V" + endc + cyan + "]ersion Identification")
         print("[" + yellow + "B" + endc + cyan + "]rute Force Browsing")
-        # print("[" + yellow + "S" + endc + cyan + "]ervice Access Testing")
+        # print("[" + yellow + "S" + endc + cyan + "]ervice Interrogater")
         print("[" + yellow + "P" + endc + cyan + "]eople Service Enumeration")
         print("[" + yellow + "U" + endc + cyan + "]serID Brute Force Search")
         print("[" + yellow + "A" + endc + cyan + "]uthentication Configuration")
@@ -263,9 +276,9 @@ def showmenu(tar):
         elif choice.capitalize() == 'B':
             bruteforcebrowsing(tar)
         # elif choice.capitalize() == 'S':
-        #    print("\nNot yet implemented\n")
+        #    service_interrogator.submenu(tar)
         elif choice.capitalize() == 'P':
-            peopleenumeration(tar)
+            peopleenumeration(tar, auth_type)
         elif choice.capitalize() == 'U':
             useridenumeration(tar)
         elif choice.capitalize() == 'A':

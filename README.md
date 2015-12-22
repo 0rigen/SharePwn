@@ -31,6 +31,7 @@ optional arguments:<br />
 some of the details.
 
 ### Short Term Development TO-DO items: ###
+* Support NTLM and Cookie-based Authentication
 * Finish People Enumeration Functionality
 * Better error handling
 * Code Clean-up

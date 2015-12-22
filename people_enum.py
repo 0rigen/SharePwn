@@ -5,7 +5,8 @@ logging.basicConfig(level=logging.CRITICAL)
 # logging.getLogger('suds.transport').setLevel(logging.DEBUG)
 
 from string import ascii_lowercase
-from suds.client import Client
+from suds import client
+from suds.transport.https import WindowsHttpAuthenticated
 
 import requests
 
@@ -72,9 +73,11 @@ def locate(target):
 def test_search(target):
     print (yellow + "[*]" + endc + " Performing service test...")
     try:
-        req = client.service['PeopleSoap'].SearchPrincipals("a", 5, "All")
+        req = clnt.service['PeopleSoap'].SearchPrincipals("a", 5, "All")
+        print(yellow + "[*]" + endc + " Test passed!...")
         return True
     except:
+        print(red + "[!]" + endc + " Service test failed.  It is unavailable or inaccessible.")
         return False
 
 
@@ -86,20 +89,16 @@ def test_search(target):
 # @results - the number of results to request
 # @rtype - the type of data to request, usually All.
 ###################################################################
-def people_search(target, numres, type, specific_string=None, creds=None, cookie=None):
+def people_search(target, numres, type, creds=None, cookie=None, specific_string=None):
     # Verify input types
     try:
 
         # Process creds, if any
         if creds is not None:
-            print("NTLM Creds not yet supported...ugh >.<")
-            # creds = WindowsHttpAuthenticated(username=str(creds[0]), password=str(creds[1]))
-            ## Create suds stuff
-            # url = target
-            # client = Client(url, transport=ntlm)
+            creds = WindowsHttpAuthenticated(username=str(creds[0]), password=str(creds[1]))
+            clnt = client.Client(url=target, transport=creds)
         elif creds is None:
-            url = target
-            client = Client(url)
+            clnt = client.Client(target)
 
         # Confirm proper input types
         numresults = int(numres)
@@ -111,7 +110,7 @@ def people_search(target, numres, type, specific_string=None, creds=None, cookie
         return 1
 
     # Check to see if the service is accessible...
-    if test_search(url) is False:
+    if test_search(target) is False:
         print (red + "[!]" + endc + " Error encountered.  Your current credentials aren't sufficient.")
         return 1
 
@@ -119,7 +118,7 @@ def people_search(target, numres, type, specific_string=None, creds=None, cookie
     if specific_string is not None:
         print (yellow + "[*]" + endc + " Performing search for '%s'" % search_text)
         try:
-            req = client.service['PeopleSoap'].SearchPrincipals(search_text, numresults, restype)
+            req = clnt.service['PeopleSoap'].SearchPrincipals(search_text, numresults, restype)
             print req
         except:
             print (red + "[!]" + endc + " Error encountered during text search")
@@ -135,7 +134,7 @@ def people_search(target, numres, type, specific_string=None, creds=None, cookie
 
                 print (yellow + "[*]" + endc + " Performing search for '%s'" % str(c))
                 try:
-                    req = client.service['PeopleSoap'].SearchPrincipals(c, numresults, restype)
+                    req = clnt.service['PeopleSoap'].SearchPrincipals(c, numresults, restype)
                     print req
                     # TODO Cleanly parse through successful alpha results and make the printout look nice
                 except:
@@ -156,7 +155,7 @@ def people_search(target, numres, type, specific_string=None, creds=None, cookie
 
                 print (yellow + "[*]" + endc + " Performing search for '%s'" % str(s))
                 try:
-                    req = client.service['PeopleSoap'].SearchPrincipals(s, numresults, restype)
+                    req = clnt.service['PeopleSoap'].SearchPrincipals(s, numresults, restype)
                     print req
                     # TODO Cleanly parse through successful special results and make the printout look nice
                 except:
@@ -171,7 +170,15 @@ def people_search(target, numres, type, specific_string=None, creds=None, cookie
 
 
 # Execution Section
-def search(target):
+def search(target, creds):
     dst = locate(target)
     if dst is not None:
-        people_search(dst, 10, "All")
+        people_search(dst, 10, "All", creds)
+
+
+'''
+tar = ["http://sharepoint.malabarsoccer.com/", 80]
+creds = ["user", "pass"]
+ret = test_search(tar)
+if ret:
+    search(tar, creds)'''
