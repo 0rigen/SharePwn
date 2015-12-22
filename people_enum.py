@@ -1,5 +1,7 @@
 import logging
 
+import requests
+
 logging.basicConfig(level=logging.CRITICAL)
 # logging.getLogger('suds.client').setLevel(logging.CRITICAL)
 # logging.getLogger('suds.transport').setLevel(logging.DEBUG)
@@ -8,8 +10,7 @@ from string import ascii_lowercase
 from suds import client
 from suds.transport.https import WindowsHttpAuthenticated
 
-import requests
-
+# TODO I might want to make this into a class
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
 __status__ = "Development"
