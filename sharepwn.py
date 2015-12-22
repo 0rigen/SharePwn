@@ -1,7 +1,7 @@
 import argparse
+import cookielib
 import logging
 import os
-import pickle
 import sys
 
 import brute_browse
@@ -62,30 +62,37 @@ def authentication_config():
     while True:
         type = str(raw_input(
                 yellow + "[!]" + endc + " Use " + green + "(N)" + endc + "TLM or " + blue + "(C)" + endc + "ookie authentication?"))
+
+        # NTLM Authentication Credentials
         if type.capitalize().startswith("N"):
             username = raw_input(blue + "Username: " + endc)
             password = raw_input(blue + "Password: " + endc)
             print(yellow + "[*]" + endc + " Using credentials " + green + "%s:%s" + endc) % (
-            str(username), str(password))
+                str(username), str(password))
             ntlm = [username, password]
             return ntlm
 
+        # Cookie-based Authentication
         elif type.capitalize().startswith("C"):
-            # TODO I still need to READ the cookie and save it somewhere rather than returning the path...
-            cookie_file = raw_input(blue + "Full Path to Cookie File: " + endc)
+            lwp_cj = cookielib.LWPCookieJar()
+            # This will likely use the CookieJar package to handle the cookies... I can either have the user
+            # Load the cookies entirely from a file, or I can even capture HTTP responses and set cookies
+            # as instructed, using extract_cookies().
+            # Alternatively, FileCookieJar can read and save to file, but an existing file has to be in the correct
+            # format for that to work.
+            # https://docs.python.org/2/library/cookielib.html
+            cookie_file = raw_input(blue + "Cookie File Location: " + endc)
             print(yellow + "[*]" + endc + " Loading cookie from %s" % str(cookie_file))
             cookie_file = str(cookie_file)
             try:
-                with open(cookie_file, 'wr') as c:
-                    print(" this isn't working yet...")
-                    cookie = requests.utils.cookiejar_from_dict(pickle.load(c))
-                    return cookie
+                lwp_cj.load(cookie_file, ignore_discard=True, ignore_expires=True)
+                print(green + "[*]" + endc + " Cookies loaded into CookieJar, We're ready to go!")
+                return lwp_cj
             except:
                 print(red + "[!] " + endc + "Failed to load cookie.")
                 break
                 # session = requests.session(cookies=cookies)
                 # The above line needs to go into the request location
-
 
 
 ##################################################
@@ -204,7 +211,10 @@ def version(target):
 # People Enumeration #
 ######################
 def peopleenumeration(target, creds):
-    people_enum.search(target, creds)
+    if type(creds) is list:
+        people_enum.creds_search(target, creds)
+    elif isinstance(creds, cookielib.LWPCookieJar):
+        people_enum.cookie_search(target, creds)
 
 
 #######################
@@ -241,15 +251,19 @@ def useridenumeration(target):
         print(yellow + "[*] No users were found :(" + endc)
 
 
+################################################################################
+# showtarget() - displays target and credentials being used                    #
+# @tar - the target url                                                        #
+# @auth - the authentication object (either a user/pass couplet or a cookiejar #
+################################################################################
 def showtarget(tar, auth):
     print(endc + blue + "\n[*] Targeting: %s:%s [*]" % (tar[0], tar[1]) + endc)
     if auth is None:
         print(endc + blue + "[*] Testing as an Unauthenticated user" + endc)
-    elif type(auth) is str:
-        print(endc + blue + "[*] Using Cookie Saved At: %s [*]" % auth + endc)
+    elif isinstance(auth, cookielib.LWPCookieJar):
+        print(endc + blue + "[*] Using Saved Cookie Jar [*]")
     elif type(auth) is list:
         print(endc + blue + "[*] Authenticating as " + green + "%s:%s" + endc) % (str(auth[0]), str(auth[1]))
-
 
 
 ###################################

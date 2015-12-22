@@ -34,13 +34,11 @@ request_set = ['$', 'SYSTEM', 'AUTHORITY', 'admin', 'Administrator', 'administra
 def locate(target):
     # Potential locations
     locations = ['/', '/Search', '/sites/us/en']
-    # i = locations.__len__()
     serv = "_vti_bin/People.asmx"
 
     # Loop over common locations, trying to ID the service
     for option in locations:
         loc = target[0] + option + serv
-        # loc = url_processor.checkhttp(loc, target[1]) # This should now be redundant
         r = requests.get(loc)
         if str(r.status_code).startswith("200"):
             print(yellow + "[*] " + endc + "Located People.asmx at: %s" % loc)
@@ -97,8 +95,11 @@ def people_search(target, numres, type, creds=None, cookie=None, specific_string
         if creds is not None:
             creds = WindowsHttpAuthenticated(username=str(creds[0]), password=str(creds[1]))
             clnt = client.Client(url=target, transport=creds)
-        elif creds is None:
-            clnt = client.Client(target)
+        elif creds is None and cookie is not None:
+            # TODO Cookie handling here...
+            print(red + "[!]" + endc + " Cookies not yet working for People search.  Reverting to unauthenticated...")
+        elif creds is None and cookie is None:
+            clnt = client.Client(url=target)
 
         # Confirm proper input types
         numresults = int(numres)
@@ -170,10 +171,16 @@ def people_search(target, numres, type, creds=None, cookie=None, specific_string
 
 
 # Execution Section
-def search(target, creds):
+def creds_search(target, creds):
     dst = locate(target)
     if dst is not None:
         people_search(dst, 10, "All", creds)
+
+
+def cookie_search(target, cookie):
+    dst = locate(target)
+    if dst is not None:
+        people_search(dst, 10, "All", None, cookie)
 
 
 '''
