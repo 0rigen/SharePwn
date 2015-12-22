@@ -3,7 +3,6 @@ import re
 import sys
 
 import requests
-
 import url_processor
 
 __author__ = '0rigen'
@@ -28,7 +27,7 @@ underline = "\033[4m"
 # @start - Integer starting value  #
 # @end - Integer ending value      #
 ####################################
-def enumusers(target, start=None, end=None):
+def enumusers(target, start=None, end=None, creds=None):
     results = []  # Results Container
     failures = []  # Failure Container to retry with Force
 
@@ -51,7 +50,10 @@ def enumusers(target, start=None, end=None):
         sys.stdout.write(yellow + "\r[...] Trying %s" % r + endc)
 
         try:
-            page = requests.get(r)  # Open the page
+            if creds is not None:
+                page = requests.get(r, HttpNtlmAuthentication=creds)  # Open the page
+            if creds is None:
+                page = requests.get(r)
 
             # Check for 2xx HTTP response and false positive indicators
             code_match = re.search("[2**]", str(page.status_code))
@@ -78,7 +80,11 @@ def enumusers(target, start=None, end=None):
         sys.stdout.write(yellow + "\r[...] Retrying %s" % r + endc)
 
         try:
-            page = requests.get(r)  # Open the page
+            if creds is not None:
+                page = requests.get(r, HttpNtlmAuthentication=creds)  # Open the page
+            if creds is None:
+                page = requests.get(r)
+
             code_match = re.search("[2**]", str(page.status_code))  # Check for success code 2xx
             nf_match = re.search("Not Found",
                                  page._content)  # Gotta regex for Not Found to avoid capitalization variations
