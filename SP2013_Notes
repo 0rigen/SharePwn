@@ -1,0 +1,44 @@
+Permissions Granularity
+(https://technet.microsoft.com/en-us/library/jj219771.aspx)
+Site
+Library or list
+Folder
+Document or item
+
+Permissions are inherited from parent objects, unless fine-grained permissions are being implemented
+
+Administrative Levels:
+Farm Administrators Group
+Windows Administrators Group
+Service Application Administrators
+Feature Administrators
+Site Collection Administrators
+Site Owners
+
+Default Groups
+-Group name- : -Default permission level-
+Visitors     : Read
+Members      : Edit
+Owners       : Full Control
+Viewers      : View Only
+
+Site templates like the Publishing template, have unique groups just as in SP2010
+
+Default Levels:
+View Only
+Limited Access
+Read
+Edit
+Contribute
+Design
+Full Control
+
+Table with great summary of EXACTLY what each permissions level grants:
+(https://technet.microsoft.com/EN-US/library/cc721640.aspx)
+
+There is a Pre-Windows 2000 Compatible Access Group
+(https://technet.microsoft.com/EN-US/library/hh296982.aspx)
+
+User Info Mappings from AD:
+(https://technet.microsoft.com/EN-US/library/hh147510.aspx)
+

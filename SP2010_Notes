@@ -1,0 +1,62 @@
+SP Protocols Documentation:
+https://msdn.microsoft.com/en-us/library/cc339475.aspx
+
+-----------------------------------------------
+2010 Default Security Groups:
+(source: https://technet.microsoft.com/en-us/library/jj219771.aspx)
+ -Group- : -Level-
+Visitors : Read
+Members  : Contribute
+Owners   : Full control
+
+This is different depending on the site template used... the publishing site template would use:
+(source: https://technet.microsoft.com/en-us/library/cc262690(v=office.14).aspx)
+ -Group- : -Level-
+ RestritecReaders     : Restricted Read
+ StyleResourceReaders : Read/Restricted Read
+ QuickDeployUsers     : Contribute to some areas
+ Approvers            : Approve/Access
+ HierarchyManagers    : Manage
+
+Available Levels:
+Limited Access
+Read
+Contribute
+Design
+Full Control
+
+Additional levels from publishing template:
+View Only
+Approve
+Manage Hierarchy
+Restricted Read
+
+(https://technet.microsoft.com/EN-US/library/cc263291(v=office.14).aspx)
+Administrative Groups:
+Farm Administrators Group
+Windows Administrators Group
+Service Application Administrators
+Feature Administrators
+Site Collection Administrators
+Site Owners
+
+(https://technet.microsoft.com/EN-US/library/cc261972(v=office.14).aspx)
+Anonymous Users can be granted either None, Deny Write, Deny All
+
+(https://technet.microsoft.com/EN-US/library/hh272820(v=office.14).aspx)
+"These files can contain scripts (such as JavaScript) that can call Web services
+and interoperate with data on a site. Web files are stored as a modifiable list based on their file extensions."
+Default List of File Extensinos:
+.ascx
+.aspx
+.asmx
+.master
+.jar
+.swf
+.xap
+.xsf
+.xsn
+
+"Users who have the default Contribute permission level in Office SharePoint Server 2007
+can add or edit Web Parts that developers have marked as unsafe for editing. However, users who have the
+default Contribute permission level in SharePoint 2010 Products cannot add or edit the same Web Parts."

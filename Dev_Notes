@@ -1,0 +1,10 @@
+To get suds to use WindowsNTLM successfully, I had to follow the instructions at
+https://fedorahosted.org/suds/wiki/SharepointArticle
+be sure that gets added to a setup script or something...
+
+This might be useful...
+PowerShell cmdlets for SharePoint:
+http://scriptlogic.http.internapcdn.net/scriptlogic/cp/articles/pdf/Jones%20SharePoint%20Security%202011_08.pdf
+
+Other useful Research:
+https://www.defcon.org/images/defcon-11/dc-11-presentations/dc-11-Shannon/presentations/dc-11-shannon.pdf
