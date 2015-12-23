@@ -19,18 +19,19 @@ underline = "\033[4m"
 # TODO Research what difference the version makes to interrogation functions.  The results of this check may impact later requests
 
 ####################################################
-# identify                                         #
+# identify()                                       #
 # Record a response from the target and examines   #
 # the headers for SP version information           #
 # @url - the target                                #
-# @ port - the target port                         #
+# @port - the target port                          #
 ####################################################
 def identify(url, port=None):
     link = url
 
     # Request the page
-    # HTTPS connections fail if there's a redirect, so jus take the first response.
-    # HTTP connections are ok with redirects, so they are flagged to allow.
+    # HTTPS connections fail if there's a redirect, so just take the first response.
+    # HTTP connections are ok with redirects, so they are flagged to allow, with allow_redirects=True
+    # User agent needs to be spoofed, since some sites will ignore a 'python' user agent
     if port == 443:
         r = requests.head(link, headers={
             'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36'},
@@ -40,7 +41,7 @@ def identify(url, port=None):
             'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36'},
                           allow_redirects=True)
 
-    # Check for a successful response.  Redirection still contains the necessary headers
+    # Check for a successful response.  Even redirection still contains the necessary headers
     if str(r.status_code).startswith("4") or str(r.status_code).startswith("5"):
         print(
             yellow + "[!] Unsuccessful request when attempting to identify SP version.  Version remains Unknown..." + endc)

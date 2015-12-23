@@ -24,8 +24,10 @@ underline = "\033[4m"
 
 ####################################
 #      enumusers()                 #
+# @target - the target url         #
 # @start - Integer starting value  #
 # @end - Integer ending value      #
+# @creds - creds, if provided      #
 ####################################
 def enumusers(target, start=None, end=None, creds=None):
     results = []  # Results Container

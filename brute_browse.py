@@ -17,6 +17,7 @@ endc = "\033[0m"
 bold = "\033[1m"
 underline = "\033[4m"
 
+# Arrays to hold results
 successes = []
 failures = []
 
@@ -38,7 +39,7 @@ def get_result(request):
     error_code = re.search('(error\.aspx)', r.url)
 
     # Unauthorized and Restricted codes are considered successful, as it implies existence
-    # Check if dynamic SharePoint error page was presented
+    # First, check if dynamic SharePoint error page was presented
     if error_code is None:
         # Code 2XX
         if success_code is not None:
@@ -83,12 +84,14 @@ def geturl_single(target, link, ntlm=None):
     get_result(r)
 
 
-###############################################
-#                    geturllist               #
-# @target- the target url                     #
-# @urllist - a file containing a list of urls #
-# @ntlm - ntlm credentials, user:pass         #
-###############################################
+#####################################################
+#                    geturllist                     #
+# Uses a list of URLs to make a series of requests, #
+#   and calls geturlsingle recursively              #
+# @target- the target url                           #
+# @urllist - a file containing a list of urls       #
+# @ntlm - ntlm credentials, user:pass               #
+#####################################################
 def geturl_list(target, urllist, ntlm=None):
     if urllist is not None:
         try:

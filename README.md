@@ -34,6 +34,7 @@ some of the details.
 ### Short Term Development TO-DO items: ###
 * Finish People Enumeration Success Parsing
 * Finish support for Cookie-based Authentication
+* Store/Save Results In Files or DB
 
 ### Contributing: ###
 Although I've written and released the initial development version of this tool myself, I am eager

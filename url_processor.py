@@ -35,12 +35,12 @@ def checkhttp(url, port):
             theurl = "http://" + url
             logging.info("Appended HTTP...")
             return theurl
-        elif httpsres is not None:  # HTTPS found, fix it
+        elif httpsres is not None:  # HTTPS found, but port is 80, fix it
             print(cyan + "[!]" + endc + " Found a port/protocol mismatch.  Fixing it for you! :D  ...")
             logging.info("The HTTP link was prepended by HTTPS, fixing it.")
             theurl = https.sub("http://", url)
             return theurl
-        elif httpres is not None:  # HTTP found
+        elif httpres is not None:  # HTTP found, good job
             theurl = url
             logging.info("The HTTP link is already good")
             return theurl
@@ -54,12 +54,12 @@ def checkhttp(url, port):
             theurl = "https://" + url
             logging.info("Appended HTTPS...")
             return theurl
-        elif httpres is not None:  # HTTP found, fix it
+        elif httpres is not None:  # HTTP found but port is 443, fix it
             print(cyan + "[!]" + endc + " Found a port/protocol mismatch.  Fixing it for you! :D  ...")
             logging.info("The HTTPS link was prepended by HTTP, fixing it.")
             theurl = http.sub("https://", url)
             return theurl
-        elif httpsres is not None:
+        elif httpsres is not None:  # HTTPS found, good job
             theurl = url
             logging.info("The HTTPS link is already good")
             return theurl

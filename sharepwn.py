@@ -54,8 +54,8 @@ def banner():
 
 ###################################################
 # Configures either NTLM or Cookie authentication #
-# ntlm - return a couple of username:password     #
-# cookie - return a ful path of the cookie file?? #
+# ntlm - return a couplet of username:password    #
+# cookie - return a cookie jar                    #
 ###################################################
 def authentication_config():
     while True:
@@ -72,14 +72,9 @@ def authentication_config():
             return ntlm
 
         # Cookie-based Authentication
+        # TODO This isn't workin yet.
         elif type.capitalize().startswith("C"):
             lwp_cj = cookielib.LWPCookieJar()
-            # This will likely use the CookieJar package to handle the cookies... I can either have the user
-            # Load the cookies entirely from a file, or I can even capture HTTP responses and set cookies
-            # as instructed, using extract_cookies().
-            # Alternatively, FileCookieJar can read and save to file, but an existing file has to be in the correct
-            # format for that to work.
-            # https://docs.python.org/2/library/cookielib.html
             cookie_file = raw_input(blue + "Cookie File Location: " + endc)
             print(yellow + "[*]" + endc + " Loading cookie from %s" % str(cookie_file))
             cookie_file = str(cookie_file)
@@ -98,7 +93,7 @@ def authentication_config():
 
 ##################################################
 # check that a url appears to be an SP site      #
-# by checking the headers                        #
+#   by checking the headers                      #
 # @target the target url and port                #
 ##################################################
 def check(target):
@@ -337,7 +332,7 @@ try:
     # parser.add_argument("-o", help="Specify output file", type=argparse.FileType('w'))
     args = parser.parse_args()
 
-    ######################################################################################
+    #####################################################################################
     # Handle target specification.  This can come in the following combinations:
     # 1; Port but no target
     # 2; target but no port

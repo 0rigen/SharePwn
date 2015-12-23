@@ -2,15 +2,15 @@ import logging
 
 import requests
 
+# Configure Logging levels
 logging.basicConfig(level=logging.CRITICAL)
-# logging.getLogger('suds.client').setLevel(logging.CRITICAL)
-# logging.getLogger('suds.transport').setLevel(logging.DEBUG)
+logging.getLogger('suds.client').setLevel(logging.CRITICAL)
+logging.getLogger('suds.transport').setLevel(logging.DEBUG)
 
 from string import ascii_lowercase
 from suds import client
 from suds.transport.https import WindowsHttpAuthenticated
 
-# I might want to make this into a class
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
 __status__ = "Development"
@@ -33,7 +33,9 @@ request_set = ['$', 'SYSTEM', 'AUTHORITY', 'admin', 'Administrator', 'administra
 # loc - returns the location where People.asmx was found  #
 ###########################################################
 def locate(target):
-    # Potential locations
+    # Potential locations.
+    # These are some common subfolders that sites might exist in
+    # Add to the list as more sites are found... google dork it.
     locations = ['/', '/Search', '/sites/us/en']
     serv = "_vti_bin/People.asmx"
 
@@ -41,11 +43,11 @@ def locate(target):
     for option in locations:
         loc = target[0] + option + serv
         r = requests.get(loc)
-        if str(r.status_code).startswith("200"):
+        if str(r.status_code).startswith("200"):  # Found it
             print(yellow + "[*] " + endc + "Located People.asmx at: %s" % loc)
-            # Now check for the WSDL; this should always be successful
+
             loc = loc + "?WSDL"
-            q = requests.get(loc)
+            q = requests.get(loc)  # Get the WSDL
             if str(q.status_code).startswith("200"):
                 print(yellow + "[*]" + endc + " Located People WSDL at: %s" % loc)
                 return loc  # Returns format: "http://www.site.com/_vti_bin/Service.asmx?WSDL"
@@ -57,6 +59,8 @@ def locate(target):
     # If we get this far, we couldn't find People.asmx
     print(yellow + "[!]" + endc + "Failed to locate the People.asmx service in common locations.")
     con = raw_input(yelow + "[?]" + endc + "Specify the location manually? (Y/N): ")
+
+    # User-defined URL
     if con.capitalize() == "Y":
         loc = raw_input(cyan + "[?]" + endc + "URL of People.asmx [Format: http://domain.com/People.asmx]:")
         return loc
@@ -73,6 +77,7 @@ def test_search(target):
     print (yellow + "[*]" + endc + " Performing service test...")
     try:
         req = clnt.service['PeopleSoap'].SearchPrincipals("a", 5, "All")
+        # TODO Should there be an actual check here to see what the result is, or is try/except enough?
         print(yellow + "[*]" + endc + " Test passed!...")
         return True
     except:
@@ -172,19 +177,35 @@ def people_search(target, numres, type, creds=None, cookie=None, specific_string
             print(red + "\n[!] " + endc + "Error returned for searchString %s\n" % s + endc)
 
 
-# Execution Section
+#############################################
+# creds_search() does an initial check for  #
+# accessibility of the service, using NTLM  #
+# @target - the url to try against          #
+# @creds - the cred couplet to use          #
+#############################################
 def creds_search(target, creds):
     dst = locate(target)
     if dst is not None:
         people_search(dst, 10, "All", creds)
 
 
+#################################################
+# cookie_search() does an initial check for     #
+# accessibility of the service, using a  cookie #
+# @target - the url to try against              #
+# @cookie - the cookie jar                      #
+#################################################
 def cookie_search(target, cookie):
     dst = locate(target)
     if dst is not None:
         people_search(dst, 10, "All", None, cookie)
 
 
+##############################################
+# anon_search() does an initial check for    #
+# accessibility of the service, anonymously  #
+# @target - the url to try against           #
+##############################################
 def anon_search(target):
     dst = locate(target)
     if dst is not None:
