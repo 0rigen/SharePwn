@@ -10,7 +10,7 @@ from string import ascii_lowercase
 from suds import client
 from suds.transport.https import WindowsHttpAuthenticated
 
-# TODO I might want to make this into a class
+# I might want to make this into a class
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
 __status__ = "Development"
@@ -81,12 +81,13 @@ def test_search(target):
 
 
 ###################################################################
-# people_search - if the service is accessible, enumerate users
-#
-# @target - the url of the target sp site
-# @text - the string to search for.  ie; "Luke" or "Anakin"
-# @results - the number of results to request
-# @rtype - the type of data to request, usually All.
+# people_search - if the service is accessible, enumerate users   #
+# @target - the url of the target sp site                         #
+# @numres - the number of results to request                      #
+# @type - the type of data to request, usually All                #
+# @creds - user:pass creds                                        #
+# @cookie - cookie to use in requests                             #
+# @specific_string - the string to search for                     #
 ###################################################################
 def people_search(target, numres, type, creds=None, cookie=None, specific_string=None):
     # Verify input types
@@ -165,7 +166,7 @@ def people_search(target, numres, type, creds=None, cookie=None, specific_string
                     break
 
         except requests.HTTPError:
-            logging.error("Got an HTTP error on an already validated People.aspx")
+            logging.error("Got an HTTP error on an already validated People.aspx; that's sure weird...")
 
         except:
             print(red + "\n[!] " + endc + "Error returned for searchString %s\n" % s + endc)
@@ -188,11 +189,3 @@ def anon_search(target):
     dst = locate(target)
     if dst is not None:
         people_search(dst, 10, "All")
-
-
-'''
-tar = ["http://sharepoint.malabarsoccer.com/", 80]
-creds = ["user", "pass"]
-ret = test_search(tar)
-if ret:
-    search(tar, creds)'''

@@ -29,7 +29,6 @@ bold = "\033[1m"
 underline = "\033[4m"
 
 
-# TODO: Add Authentication attempts via "from requests_ntlm import HttpNtlmAuth"
 # TODO: Add Authentication via cookies
 # TODO: Explore moving my web requests into a single function rather than being spread throughout the program
 # TODO: Add timeout to requests to prevent hangs
@@ -87,7 +86,9 @@ def authentication_config():
             try:
                 lwp_cj.load(cookie_file, ignore_discard=True, ignore_expires=True)
                 print(green + "[*]" + endc + " Cookies loaded into CookieJar, We're ready to go!")
-                return lwp_cj
+                req_cj = requests.utils.dict_from_cookiejar(lwp_cj)
+                print str(reqs_cj)
+                return reqs_cj
             except:
                 print(red + "[!] " + endc + "Failed to load cookie.")
                 break
