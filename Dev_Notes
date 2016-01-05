@@ -8,3 +8,12 @@ http://scriptlogic.http.internapcdn.net/scriptlogic/cp/articles/pdf/Jones%20Shar
 
 Other useful Research:
 https://www.defcon.org/images/defcon-11/dc-11-presentations/dc-11-Shannon/presentations/dc-11-shannon.pdf
+
+To-do Items:
+Create an Authentication class/object to maintain auth settings during runtime
+Create a session when doing the initial SP identification when users set their target
+Modify (Recreate) the session when authentication gets reconfigured
+ - If authentication is in an object, my calls only need an: "If session is null, then authenticate"
+Identify common workflows or commonalities between services and implement as Interface, if py supports it
+
+
