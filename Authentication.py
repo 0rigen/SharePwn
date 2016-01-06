@@ -5,6 +5,10 @@ class Authentication:
     Depending on which type of auth is called, we can establish the appropriate session within
        that same function definition...
     '''
+    type = None  # cookie, ntlm, or None
+    user = None
+    paswd = None
+    cookie = None
 
     # Function definitions
     def __init__(self):

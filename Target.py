@@ -4,8 +4,10 @@ import requests
 import url_processor
 
 
+# import brute_browse
+
+
 class Target:
-    # Possibly store these elsewhere, in DB, in file?
     url = None  # target url
     port = None  # target port
     sp_version = None  # SharePoint version number string
@@ -104,3 +106,6 @@ class Target:
             else:
                 self.sp_version = " ".join("Unknown SharePoint Version")
             logging.info("SP Version ID successful. Found %s" % ver)
+
+    def brute_browse(self):
+#two_pages = brute_browse.geturl_list(self.url, browse_list.txt)
