@@ -21,6 +21,7 @@ class Target:
     def __init__(self):
         self.url = ''
         self.port = ''
+        logging.debug("Target object initialized.")
 
     ##################################################
     # check that a url appears to be a valid SP site #
@@ -30,11 +31,15 @@ class Target:
     ##################################################
     def check(self):
         self.url = url_processor.checkhttp(self.url, self.port)
+        logging.info("Target:Check() Processed URL")
         try:
             r = requests.get(self.url, verify=False)
+            logging.debug("Target:Check() Requested URL, got code %s" % r.status_code)
             head_check = str(r.headers['microsoftsharepointteamservices'])
+            logging.debug("Target:Check() Returning %s as header result" % head_check)
             return head_check
         except:
+            logging.error("Target:Check() No sharepoint header found during check(), returning None.")
             return None
 
     def id_version(self):
@@ -43,20 +48,19 @@ class Target:
         # HTTP connections are ok with redirects, so they are flagged to allow, with allow_redirects=True
         # User agent needs to be spoofed, since some sites will ignore a 'python' user agent
         if self.port == 443:
+            logging.debug("Target:id_version() Requesting with spoofed user-agent on 443")
             r = requests.head(self.url, headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36'},
                               verify=False)
         elif self.port == 80:
+            logging.debug("Target:id_version() Requesting with spoofed user-agent on 80")
             r = requests.head(self.url, headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36'},
                               allow_redirects=True)
 
         # Check for a successful response.  Even redirection still contains the necessary headers
         if str(r.status_code).startswith("4") or str(r.status_code).startswith("5"):
-            print(
-                yellow + "[!] Unsuccessful request when attempting to identify SP version.  Version remains Unknown..." + endc)
-            print("This sometimes indicates that you'll need valid credentials to see the SP site.")
-            logging.info("Version ID failed; Got a response %s" % str(r.status_code))
+            logging.debug("Target:id_version() Version ID failed; Got a response %s" % str(r.status_code))
             return "Unknown"
 
         # Search for version info in headers
@@ -105,7 +109,7 @@ class Target:
                 self.sp_version += ", SharePoint 2013"
             else:
                 self.sp_version = " ".join("Unknown SharePoint Version")
-            logging.info("SP Version ID successful. Found %s" % ver)
+            logging.info("SP Version ID successful. Found %s" % self.sp_version)
 
-    def brute_browse(self):
-#two_pages = brute_browse.geturl_list(self.url, browse_list.txt)
+            # def brute_browse(self):
+            # two_pages = brute_browse.geturl_list(self.url, browse_list.txt)

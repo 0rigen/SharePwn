@@ -1,11 +1,7 @@
-import cookielib
 import os
 import sys
 
-import brute_browse
-import people_enum
 import requests
-import user_id
 from Engagement import Engagement
 
 __author__ = '0rigen'
@@ -29,6 +25,8 @@ underline = "\033[4m"
 # TODO: Add Authentication via cookies
 # TODO: Add timeout to requests to prevent hangs
 
+my_engagement = None
+
 # ************************************
 # Begin function definitions section
 # ************************************
@@ -48,6 +46,7 @@ def banner():
     SharePoint Security Auditing by @_0rigen / 0rigen.net""" + endc)
 
 
+"""
 ########################
 # Brute Force Browsing #
 ########################
@@ -108,23 +107,8 @@ def useridenumeration(target):
             print user,
     else:
         print(yellow + "[*] No users were found :(" + endc)
-
-
 """
-################################################################################
-# showtarget() - displays target and credentials being used                    #
-# @tar - the target url                                                        #
-# @auth - the authentication object (either a user/pass couplet or a cookiejar #
-################################################################################
-def showtarget():
-    print(endc + blue + "\n[*] Targeting: %s:%s [*]" % (my_engagement) + endc)
-    if auth is None:
-        print(endc + blue + "[*] Testing as an Unauthenticated user" + endc)
-    elif isinstance(auth, cookielib.LWPCookieJar):
-        print(endc + blue + "[*] Using Saved Cookie Jar [*]")
-    elif type(auth) is list:
-        print(endc + blue + "[*] Authenticating as " + green + "%s:%s" + endc) % (str(auth[0]), str(auth[1]))
-"""
+
 
 ###################################
 # Show the menu                   #
@@ -132,6 +116,7 @@ def showtarget():
 ###################################
 def showmenu():
     while True:
+        print(cyan + "Target: %s:%d" % my_engagement.target.url, my_engagement.target.port)
         print(cyan + "Please choose an option below: \n")
         print("[" + yellow + "V" + endc + cyan + "]ersion Identification")
         print("[" + yellow + "B" + endc + cyan + "]rute Force Browsing")
@@ -170,10 +155,12 @@ def showmenu():
 # Begin instruction section
 # ************************************
 try:
+    # Create new engagement object
     my_engagement = Engagement()
 
     # Welcome to SharePwn
     banner()
+
     # Either no command-line functions were specified or their runs have completed.  Go back to the menu...
     showmenu()
 
