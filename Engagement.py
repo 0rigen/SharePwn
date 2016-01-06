@@ -47,11 +47,13 @@ class Engagement:
             self.authenticator.cookie_file = raw_input("[?] Full path to cookie file: ")
             logging.debug("Got cookie location as %s" % self.authenticator.cookie_file)
             self.authenticator.build_cookie_session()
-        if self.auth_type.startswith("N"):
+        elif self.auth_type.startswith("N"):
             self.authenticator.user = raw_input("[?] Username: ")
             self.authenticator.paswd = raw_input("[?] Password: ")
             self.authenticator.build_ntlm_session()
-        if self.auth_type.startswith("A"):
+        elif self.auth_type.startswith("A"):
+            pass
+        else:
             pass
 
         # Verify SP exists at given location and find the version

@@ -25,7 +25,6 @@ underline = "\033[4m"
 # TODO: Add Authentication via cookies
 # TODO: Add timeout to requests to prevent hangs
 
-my_engagement = None
 
 # ************************************
 # Begin function definitions section
@@ -116,7 +115,6 @@ def useridenumeration(target):
 ###################################
 def showmenu():
     while True:
-        print(cyan + "Target: %s:%d" % my_engagement.target.url, my_engagement.target.port)
         print(cyan + "Please choose an option below: \n")
         print("[" + yellow + "V" + endc + cyan + "]ersion Identification")
         print("[" + yellow + "B" + endc + cyan + "]rute Force Browsing")
@@ -159,6 +157,8 @@ try:
     my_engagement = Engagement()
 
     # Welcome to SharePwn
+    # print("Target: %s" % my_engagement.target.url),
+    # print("on port %s" % str(my_engagement.target.port))
     banner()
 
     # Either no command-line functions were specified or their runs have completed.  Go back to the menu...
