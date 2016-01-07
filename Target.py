@@ -1,7 +1,7 @@
 import logging
 
+import URL_Processor
 import requests
-import url_processor
 
 
 # import brute_browse
@@ -23,14 +23,9 @@ class Target:
         self.port = ''
         logging.debug("Target object initialized.")
 
-    ##################################################
-    # check that a url appears to be a valid SP site #
-    #   by checking the headers                      #
-    # @target the target url and port                #
-    # return header if it exists                     #
-    ##################################################
+    # check that a url appears to be a valid SP site
     def check(self):
-        self.url = url_processor.checkhttp(self.url, self.port)
+        self.url = URL_Processor.checkhttp(self.url, self.port)
         logging.info("Target:Check() Processed URL")
         try:
             r = requests.get(self.url, verify=False)

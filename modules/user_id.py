@@ -2,8 +2,8 @@ import logging
 import re
 import sys
 
+import URL_Processor
 import requests
-import url_processor
 
 __author__ = '0rigen'
 __email__ = "0rigen@0rigen.net"
@@ -43,7 +43,7 @@ def enumusers(target, start=None, end=None, creds=None):
         sys.stdout.write("\n")
 
     # Ensure proper target specification
-    target = url_processor.checkhttp(target[0], target[1])  # Check traget formatting
+    target = URL_Processor.checkhttp(target[0], target[1])  # Check traget formatting
 
     # Begin requesting pages
     for i in range(start, end):  # From start to end...
