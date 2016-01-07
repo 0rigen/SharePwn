@@ -60,3 +60,8 @@ Default List of File Extensinos:
 "Users who have the default Contribute permission level in Office SharePoint Server 2007
 can add or edit Web Parts that developers have marked as unsafe for editing. However, users who have the
 default Contribute permission level in SharePoint 2010 Products cannot add or edit the same Web Parts."
+
+NOTE: Cookie based authentication for SP2010+ requires a federated identity system established:
+    - AD DC
+    - AD CA
+    - AD FS
