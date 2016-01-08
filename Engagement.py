@@ -3,7 +3,9 @@ import logging
 import os
 import sys
 
+from Authenticator import Authenticator
 from Printer import Printer
+from Requestor import Requestor
 from Target import Target
 
 """ Defines an Engagement top-level class
@@ -29,6 +31,7 @@ class Engagement:
     auth_type = None  # cookie, userpass, or none
     session_established = False  # boolean
     session = None  # Session object
+    requestor = None
 
     def __init__(self):
         """ Initialize the Engagement
@@ -37,16 +40,8 @@ class Engagement:
         self.printer = Printer()  # Create the printer
         self.load_modules()  # Load modules from modules/ directory
         self.target = Target()  # Create the target
-
-        # Get the target
-        self.target.url = self.printer.input("Target URL:")
-        logging.debug("Engagement:__init__() got Target URL %s" % self.target.url)
-        try:
-            self.target.port = int(self.printer.input("Target Port:"))  # Turn port input into int
-            logging.debug("Engagement:__init__() got Port %d" % self.target.port)
-        except ValueError:
-            self.printer.error("Port must be a number")
-
+        self.authenticator = Authenticator(my_engagement)  # Create authenticator for this engagement
+        self.requestor = Requestor()  # Create Requestor for this engagement
 
         # Verify SP exists at given location and find the version
         logging.debug("Engagement:__init__() calling Target:check()")

@@ -2,6 +2,7 @@ import logging
 
 import URL_Processor
 import requests
+from Printer import Printer
 
 
 # import brute_browse
@@ -22,6 +23,16 @@ class Target:
         self.url = ''
         self.port = ''
         logging.debug("Target object initialized.")
+
+        self.printer = Printer()
+
+        self.url = self.printer.input("Target URL:")
+        logging.debug("Engagement:__init__() got Target URL %s" % self.url)
+        try:
+            self.port = int(self.printer.input("Target Port:"))  # Turn port input into int
+            logging.debug("Engagement:__init__() got Port %d" % self.port)
+        except ValueError:
+            self.printer.error("Port must be a number")
 
     # check that a url appears to be a valid SP site
     def check(self):

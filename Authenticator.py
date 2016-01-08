@@ -27,7 +27,7 @@ class Authenticator:
     printer = None
 
     # Function definitions
-    def __init__(self, engagement):
+    def __init__(self):
         self.data = []
         logging.debug("Authentication Object Initialized.")
         printer = Printer()

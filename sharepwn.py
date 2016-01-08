@@ -1,6 +1,5 @@
 import sys
 
-from Authenticator import Authenticator
 from Engagement import Engagement
 
 __author__ = '0rigen'
@@ -15,10 +14,6 @@ __status__ = "Development"
 try:
     # Create new engagement object
     my_engagement = Engagement()
-
-    # Create authenticator
-    self.authenticator = Authenticator(my_engagement)  # Create authenticator for this engagement
-    logging.info("Engagement object initialized.")
 
     # TODO: Find a way to dynamically build functionality around the user-defined extension modules
     # For now, I will hardcode the functionality that exists, and can include more modules manually later on
