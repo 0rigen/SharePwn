@@ -3,7 +3,6 @@ import logging
 import os
 import sys
 
-from Authenticator import Authenticator
 from Printer import Printer
 from Target import Target
 
@@ -48,24 +47,6 @@ class Engagement:
         except ValueError:
             self.printer.error("Port must be a number")
 
-        # Create authenticator
-        self.authenticator = Authenticator()  # Create authenticator for this engagement
-        logging.info("Engagement object initialized.")
-
-        # Set up authentication
-        self.auth_type = self.printer.input("Authenticate with a (C)ookie, (N)TLM, or remain [Anonymous]?")
-        if self.auth_type.startswith("C"):
-            self.authenticator.cookie_file = self.printer.input("Full path to cookie file: ")
-            logging.debug("Got cookie location as %s" % self.authenticator.cookie_file)
-            self.authenticator.build_cookie_session()
-        elif self.auth_type.startswith("N"):
-            self.authenticator.user = self.printer.input("Username: ")
-            self.authenticator.paswd = self.printer.input("Password: ")
-            self.authenticator.build_ntlm_session()
-        elif self.auth_type.startswith("A"):
-            pass
-        else:
-            pass
 
         # Verify SP exists at given location and find the version
         logging.debug("Engagement:__init__() calling Target:check()")

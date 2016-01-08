@@ -1,4 +1,5 @@
 import logging
+import sys
 
 """ Printer takes an output intended for the console and colors it
 as well as adds an appropriate icon.  Printer also is called to
@@ -72,8 +73,29 @@ class Printer:
 
         SharePoint Security Auditing by @_0rigen / 0rigen.net""" + self.endc)
 
-    def show_menu(self):
+    def main_menu(self):
         """ showmenu - display the Engagement menu on the console
+
+        :return: char, menu choice
+        """
+        while True:
+            print(self.cyan + self.underline + "Please choose an option below: \n" + self.endc)
+            print("[" + self.yellow + "I" + self.endc + self.cyan + "]nterrogation Modules")
+            print("[" + self.yellow + "T" + self.endc + self.cyan + "]arget Information Modules")
+            print("\r")
+            print("[" + self.yellow + "Q" + self.endc + self.cyan + "]uit and go home")
+            choice = raw_input("Command: " + self.endc)
+            if choice.capitalize() == 'T':
+                self.interrogate_menu()
+            elif choice.capitalize() == 'I':
+                self.information_menu()
+            elif choice.capitalize() == 'Q':
+                sys.exit(0)
+            else:
+                self.error("Command not understood; try again, buddy!")
+
+    def interrogate_menu(self):
+        """ showmenu - display the Interrogation menu on the console
 
         :return: char, menu choice
         """
@@ -87,6 +109,7 @@ class Printer:
             print("[" + self.yellow + "A" + self.endc + self.cyan + "]uthentication Configuration")
             print("[" + self.yellow + "T" + self.endc + self.cyan + "]arget (Change your target URL/Protocol)")
             print("[" + self.yellow + "O" + self.endc + self.cyan + "]utput Redirection (Print to a file)")
+            print("[" + self.yellow + "B" + self.endc + self.cyan + "]ack")
             print("[" + self.yellow + "Q" + self.endc + self.cyan + "]uit and go home")
             choice = raw_input("Command: " + self.endc)
             if choice.capitalize() == 'B':
@@ -107,5 +130,57 @@ class Printer:
                 return 'O'
             elif choice.capitalize() == 'Q':
                 return 'Q'
+            else:
+                self.error("Command not understood; try again, buddy!")
+
+    def information_menu(self):
+        """ showmenu - display the Target Information menu on the console
+
+        :return: char, menu choice
+        """
+        while True:
+            print(self.cyan + self.underline + "Please choose an option below: \n" + self.endc)
+            print("[" + self.yellow + "V" + self.endc + self.cyan + "]ersion Information")
+            print("[" + self.yellow + "B" + self.endc + self.cyan + "]ack")
+            print("[" + self.yellow + "Q" + self.endc + self.cyan + "]uit and go home")
+            choice = raw_input("Command: " + self.endc)
+            if choice.capitalize() == 'B':
+                self.main_menu()
+            elif choice.capitalize() == 'V':
+                return 'V'
+            # elif choice.capitalize() == 'S':
+            #    service_interrogator.submenu(tar)
+            elif choice.capitalize() == 'P':
+                return 'P'
+            elif choice.capitalize() == 'U':
+                return 'U'
+            elif choice.capitalize() == 'A':
+                return 'A'
+            elif choice.capitalize() == 'T':
+                return 'T'
+            elif choice.capitalize() == 'O':
+                return 'O'
+            elif choice.capitalize() == 'Q':
+                return 'Q'
+            else:
+                self.error("Command not understood; try again, buddy!")
+
+    def information_menu(self):
+        """ showmenu - display the Engagement Configuration menu on the console
+
+        :return: char, menu choice
+        """
+        while True:
+            print(self.cyan + self.underline + "Please choose an option below: \n" + self.endc)
+            print("[" + self.yellow + "A" + self.endc + self.cyan + "]uthentication Configuration")
+            print("[" + self.yellow + "T" + self.endc + self.cyan + "]arget (Change your target URL/Protocol)")
+            print("[" + self.yellow + "O" + self.endc + self.cyan + "]utput Redirection (Print to a file)")
+            print("[" + self.yellow + "B" + self.endc + self.cyan + "]ack")
+            print("[" + self.yellow + "Q" + self.endc + self.cyan + "]uit and go home")
+            choice = raw_input("Command: " + self.endc)
+            if choice.capitalize() == 'B':
+                self.main_menu()
+            elif choice.capitalize() == 'V':
+                return 'V'
             else:
                 self.error("Command not understood; try again, buddy!")

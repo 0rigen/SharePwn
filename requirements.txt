@@ -1,5 +1,5 @@
 requests>=2.8.1
+requests_ntlm>=0.0.2.4
 logging
-requests_ntlm>=0.2.0
 BeautifulSoup
 suds-jurko

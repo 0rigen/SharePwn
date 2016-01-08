@@ -1,5 +1,6 @@
 import sys
 
+from Authenticator import Authenticator
 from Engagement import Engagement
 
 __author__ = '0rigen'
@@ -15,13 +16,17 @@ try:
     # Create new engagement object
     my_engagement = Engagement()
 
+    # Create authenticator
+    self.authenticator = Authenticator(my_engagement)  # Create authenticator for this engagement
+    logging.info("Engagement object initialized.")
+
     # TODO: Find a way to dynamically build functionality around the user-defined extension modules
     # For now, I will hardcode the functionality that exists, and can include more modules manually later on
 
     # Show the Engagement menu
     # TODO: Is there a better place to put these function handlers?
     while True:
-        menu_choice = my_engagement.printer.show_menu()
+        menu_choice = my_engagement.printer.main_menu()
         if menu_choice.startswith('Q'):
             my_engagement.printer.error("Quitting...")
             sys.exit(0)
