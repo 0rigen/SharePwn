@@ -8,6 +8,9 @@ import sys
 # store validated modules as lists of tuples in the form of (name, class object)
 scnrs = []
 auxes = []
+t = tfoo.framework.target.Information()
+t.desc = "n00bp01nt"
+t.ip = "8.8.8.8"
 
 
 def loadmodules():
@@ -47,7 +50,7 @@ def loadmodules():
         nc = c()
         print "    - " + s + " check function results: ",
         # Execute the function we know it MUST have because it extends the ABC
-        nc.check()
+        nc.check(t)
 
     print ""
 
@@ -60,6 +63,7 @@ def loadmodules():
 
     print ""
     print "Done!"
+
 
 # Call the function we just defined so it displays something
 loadmodules()

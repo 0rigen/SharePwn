@@ -2,6 +2,7 @@
 # The namespaces we want to iterate through recursively must be known in advance
 from scanners import *
 from aux import *
+from framework import *
 
 # Defining what "all" means for "tfoo" allows us to include all sub-modules by importing tfoo
-__all__ = ["scanners", "aux"]
+__all__ = ["scanners", "aux", "framework"]

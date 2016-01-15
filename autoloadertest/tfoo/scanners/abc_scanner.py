@@ -4,10 +4,10 @@ class baseScanner:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def check(self): pass
+    def check(self, tgt): pass
 
     @abstractmethod
-    def scan(self): pass
+    def scan(self, tgt): pass
 
     @abstractmethod
-    def save(self): pass
+    def save(self, tgt): pass
